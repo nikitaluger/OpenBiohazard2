@@ -74,6 +74,16 @@ func (aotManager *AotManager) AddScriptSprite(sprite fileio.ScriptInstrSceEsprOn
 	aotManager.Sprites = append(aotManager.Sprites, sprite)
 }
 
+func (aotManager *AotManager) RemoveScriptSprite(id uint8) {
+	filtered := aotManager.Sprites[:0]
+	for _, sprite := range aotManager.Sprites {
+		if sprite.Id != id {
+			filtered = append(filtered, sprite)
+		}
+	}
+	aotManager.Sprites = filtered
+}
+
 func (aotManager *AotManager) GetDoorNearPlayer(position mgl32.Vec3) *AotDoor {
 	for _, door := range aotManager.Doors {
 		vertices := door.Bounds.Vertices

@@ -242,7 +242,7 @@ func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 	case fileio.OP_AOT_RESET: // 0x46
 		returnValue = scriptDef.ScriptAotReset(lineData, gameDef)
 	case fileio.OP_SCE_ESPR_KILL: // 0x4c
-		returnValue = scriptDef.ScriptSceEsprKill(lineData)
+		returnValue = scriptDef.ScriptSceEsprKill(lineData, gameDef)
 	case fileio.OP_ITEM_AOT_SET: // 0x4e
 		returnValue = scriptDef.ScriptItemAotSet(lineData, gameDef)
 	case fileio.OP_SCE_BGM_CONTROL: // 0x51

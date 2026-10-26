@@ -19,12 +19,11 @@ func (scriptDef *ScriptDef) ScriptSceEsprOn(lineData []byte, gameDef *game.GameD
 	return 1
 }
 
-func (scriptDef *ScriptDef) ScriptSceEsprKill(lineData []byte) int {
+func (scriptDef *ScriptDef) ScriptSceEsprKill(lineData []byte, gameDef *game.GameDef) int {
 	byteArr := bytes.NewBuffer(lineData)
 	instruction := fileio.ScriptInstrSceEsprKill{}
 	binary.Read(byteArr, binary.LittleEndian, &instruction)
 
-	// TODO: implement
-
+	gameDef.GameWorld.AotManager.RemoveScriptSprite(instruction.Id)
 	return 1
 }
