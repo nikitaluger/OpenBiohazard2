@@ -101,6 +101,21 @@ func (a *AudioManager) PlaySFX(id int) {
 	a.playTone(880, 200*time.Millisecond)
 }
 
+// SFXNames maps sound effect ids observed in scripts to human-readable names.
+var SFXNames = map[int]string{
+	0x0A: "Unknown SFX 0x0A",
+	0x0B: "Unknown SFX 0x0B",
+	0x21: "Unknown SFX 0x21",
+}
+
+// SFXName returns a readable name for a sound effect id.
+func SFXName(id int) string {
+	if name, ok := SFXNames[id]; ok {
+		return name
+	}
+	return "Unknown SFX"
+}
+
 func (a *AudioManager) playTone(freq float64, duration time.Duration) {
 	sine, err := generators.SineTone(a.sampleRate, freq)
 	if err != nil {

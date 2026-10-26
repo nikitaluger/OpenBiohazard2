@@ -438,9 +438,13 @@ func (scriptDef *ScriptDef) ScriptSceBgmControl(lineData []byte, gameDef *game.G
 	return 1
 }
 func (scriptDef *ScriptDef) ScriptSeOn(lineData []byte, gameDef *game.GameDef) int {
-	fmt.Printf("SE_ON: % x\n", lineData)
-	if gameDef != nil && gameDef.Audio != nil && len(lineData) > 1 {
-		gameDef.Audio.PlaySFX(int(lineData[1]))
+	sfxID := 0
+	if len(lineData) > 2 {
+		sfxID = int(lineData[2])
+	}
+	fmt.Printf("SE_ON: id=%d (%s) raw=% x\n", sfxID, audio.SFXName(sfxID), lineData)
+	if gameDef != nil && gameDef.Audio != nil {
+		gameDef.Audio.PlaySFX(sfxID)
 	}
 	return 1
 }
