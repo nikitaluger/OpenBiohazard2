@@ -1,8 +1,10 @@
 package audio
 
 import (
-	"bytes"
 	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"time"
 
 	"github.com/gopxl/beep"
@@ -26,7 +28,7 @@ type AudioManager struct {
 
 // NewAudioManager initializes the audio system.
 func NewAudioManager() *AudioManager {
-	sr := beep.SampleRate(44100)
+	sr := beep.SampleRate(22050)
 	_ = speaker.Init(sr, 1024)
 	return &AudioManager{
 		sampleRate:  sr,
@@ -74,25 +76,19 @@ func (a *AudioManager) SetVolume(target uint8, left, right uint8) {
 	}
 }
 
-// PlayBGM plays a BGM track by id using SAP files.
+// PlayBGM plays a BGM track by id, converting SAP (ADPCM) to PCM via ffmpeg.
 func (a *AudioManager) PlayBGM(id int) {
 	filename := fmt.Sprintf("data/Common/Sound/bgm/MAIN%02X.SAP", id)
-	sap, err := fileio.LoadSAPFile(filename)
+	streamer, err := a.loadSAPStreamer(filename)
 	if err != nil {
-		// Fall back to a placeholder tone if the file is missing.
+		fmt.Printf("PlayBGM: failed to load %s: %v\n", filename, err)
 		a.playTone(440+float64(id*10), time.Second)
 		return
 	}
 
-	streamer, format, err := wav.Decode(bytes.NewReader(sap.AudioData))
-	if err != nil {
-		a.playTone(440+float64(id*10), time.Second)
-		return
-	}
-
+	fmt.Printf("PlayBGM: playing %s\n", filename)
 	speaker.Clear()
 	speaker.Play(beep.Loop(-1, streamer))
-	_ = format
 }
 
 // StopBGM stops all currently playing audio.
@@ -111,4 +107,41 @@ func (a *AudioManager) playTone(freq float64, duration time.Duration) {
 		return
 	}
 	speaker.Play(beep.Take(a.sampleRate.N(duration), sine))
+}
+
+func (a *AudioManager) loadSAPStreamer(filename string) (beep.StreamSeeker, error) {
+	sap, err := fileio.LoadSAPFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	tmpDir := os.TempDir()
+	inPath := filepath.Join(tmpDir, "sap_input.wav")
+	outPath := filepath.Join(tmpDir, "sap_output.wav")
+
+	if err := os.WriteFile(inPath, sap.AudioData, 0644); err != nil {
+		return nil, err
+	}
+
+	cmd := exec.Command("ffmpeg", "-y", "-i", inPath, outPath)
+	if err := cmd.Run(); err != nil {
+		return nil, err
+	}
+
+	f, err := os.Open(outPath)
+	if err != nil {
+		return nil, err
+	}
+	streamer, format, err := wav.Decode(f)
+	if err != nil {
+		f.Close()
+		return nil, err
+	}
+
+	buf := beep.NewBuffer(format)
+	buf.Append(streamer)
+	streamer.Close()
+	f.Close()
+
+	return buf.Streamer(0, buf.Len()), nil
 }

@@ -33,6 +33,16 @@ func (p *pcmStreamer) Err() error { return nil }
 // DecodeVAGToWAV writes decoded VAG data as a WAV file.
 func DecodeVAGToWAV(data []byte, sampleRate int, w io.WriteSeeker) error {
 	pcm := DecodeVAG(data)
+	return writePCMToWAV(pcm, sampleRate, w)
+}
+
+// DecodeVAGResetToWAV writes reset-state decoded VAG data as a WAV file.
+func DecodeVAGResetToWAV(data []byte, sampleRate int, w io.WriteSeeker) error {
+	pcm := DecodeVAGReset(data)
+	return writePCMToWAV(pcm, sampleRate, w)
+}
+
+func writePCMToWAV(pcm []int16, sampleRate int, w io.WriteSeeker) error {
 	sr := beep.SampleRate(sampleRate)
 
 	streamer := &pcmStreamer{samples: pcm}
