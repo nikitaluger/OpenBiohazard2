@@ -98,7 +98,8 @@ func (a *AudioManager) StopBGM() {
 
 // PlaySFX plays a short placeholder tone for a sound effect id.
 func (a *AudioManager) PlaySFX(id int) {
-	a.playTone(880, 200*time.Millisecond)
+	freq := 600.0 + float64(id*15)
+	a.playTone(freq, 200*time.Millisecond)
 }
 
 // SFXNames maps sound effect ids observed in scripts to human-readable names.
