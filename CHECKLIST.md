@@ -31,6 +31,7 @@
   - [x] Wire BGM control opcode
   - [x] Integrate audio library
   - [x] Decode VAG ADPCM (verified)
+  - [x] Create VAG test tool (vagtest)
   - [ ] Map BGM/SFX IDs to tracks
   - [ ] Parse VAB data
   - [ ] Looping and volume control
