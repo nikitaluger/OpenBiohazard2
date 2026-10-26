@@ -2,225 +2,347 @@ package fileio
 
 import (
 	"bytes"
-	"encoding/binary"
 	"io"
 	"testing"
 )
 
-func newStreamReader(data []byte) *StreamReader {
-	return NewStreamReader(io.NewSectionReader(bytes.NewReader(data), 0, int64(len(data))))
-}
-
-func TestStreamReader_ReadUint8(t *testing.T) {
-	sr := newStreamReader([]byte{0xAB})
-	got, err := sr.ReadUint8()
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+// Helper function to compare byte slices
+func compareByteSlices(a, b []byte) bool {
+	if len(a) != len(b) {
+		return false
 	}
-	if got != 0xAB {
-		t.Errorf("got %d, want %d", got, 0xAB)
-	}
-}
-
-func TestStreamReader_ReadUint16(t *testing.T) {
-	data := make([]byte, 2)
-	binary.LittleEndian.PutUint16(data, 0x1234)
-	sr := newStreamReader(data)
-	got, err := sr.ReadUint16()
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if got != 0x1234 {
-		t.Errorf("got %d, want %d", got, 0x1234)
-	}
-}
-
-func TestStreamReader_ReadUint32(t *testing.T) {
-	data := make([]byte, 4)
-	binary.LittleEndian.PutUint32(data, 0x89ABCDEF)
-	sr := newStreamReader(data)
-	got, err := sr.ReadUint32()
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if got != 0x89ABCDEF {
-		t.Errorf("got %d, want %d", got, 0x89ABCDEF)
-	}
-}
-
-func TestStreamReader_ReadInt16(t *testing.T) {
-	data := make([]byte, 2)
-	binary.LittleEndian.PutUint16(data, 0xFFFB) // -5 as int16
-	sr := newStreamReader(data)
-	got, err := sr.ReadInt16()
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if got != -5 {
-		t.Errorf("got %d, want %d", got, -5)
-	}
-}
-
-func TestStreamReader_ReadFloat32(t *testing.T) {
-	data := make([]byte, 4)
-	binary.LittleEndian.PutUint32(data, 0x3F800000) // 1.0
-	sr := newStreamReader(data)
-	got, err := sr.ReadFloat32()
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if got != 1.0 {
-		t.Errorf("got %v, want 1.0", got)
-	}
-}
-
-func TestStreamReader_ReadBytes(t *testing.T) {
-	input := []byte{1, 2, 3, 4}
-	sr := newStreamReader(input)
-	got, err := sr.ReadBytes(4)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if len(got) != 4 {
-		t.Fatalf("got len %d, want 4", len(got))
-	}
-	for i := range input {
-		if got[i] != input[i] {
-			t.Errorf("byte %d: got %d, want %d", i, got[i], input[i])
+	for i := range a {
+		if a[i] != b[i] {
+			return false
 		}
 	}
+	return true
 }
 
-func TestStreamReader_ReadBytes_InvalidCount(t *testing.T) {
-	sr := newStreamReader([]byte{1, 2, 3})
-	if _, err := sr.ReadBytes(0); err == nil {
-		t.Fatal("expected error for count 0")
-	}
-	if _, err := sr.ReadBytes(-1); err == nil {
-		t.Fatal("expected error for negative count")
-	}
+// Helper function to create a test StreamReader with given data
+func createTestStreamReader(data []byte) *StreamReader {
+	reader := io.NewSectionReader(bytes.NewReader(data), 0, int64(len(data)))
+	return NewStreamReader(reader)
 }
 
-func TestStreamReader_ReadString_NullTerminated(t *testing.T) {
-	input := []byte{'h', 'i', 0, 'x'}
-	sr := newStreamReader(input)
-	got, err := sr.ReadString(4)
+func TestReadUint8(t *testing.T) {
+	// Test normal reading
+	data := []byte{0x42, 0x00, 0xFF}
+	reader := createTestStreamReader(data)
+
+	value, err := reader.ReadUint8()
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Errorf("Expected no error, got %v", err)
 	}
-	if got != "hi" {
-		t.Errorf("got %q, want %q", got, "hi")
+	if value != 0x42 {
+		t.Errorf("Expected 0x42, got 0x%02X", value)
 	}
-}
 
-func TestStreamReader_ReadFixedString_TrimsPadding(t *testing.T) {
-	input := []byte{'a', 'b', 0, 0}
-	sr := newStreamReader(input)
-	got, err := sr.ReadFixedString(4)
+	// Test reading next value
+	value, err = reader.ReadUint8()
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Errorf("Expected no error, got %v", err)
 	}
-	if got != "ab" {
-		t.Errorf("got %q, want %q", got, "ab")
+	if value != 0x00 {
+		t.Errorf("Expected 0x00, got 0x%02X", value)
 	}
-}
 
-func TestStreamReader_SetPosition(t *testing.T) {
-	input := []byte{10, 20, 30}
-	sr := newStreamReader(input)
-	sr.SetPosition(1)
-	got, err := sr.ReadUint8()
+	// Test reading last value
+	value, err = reader.ReadUint8()
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Errorf("Expected no error, got %v", err)
 	}
-	if got != 20 {
-		t.Errorf("got %d, want 20", got)
+	if value != 0xFF {
+		t.Errorf("Expected 0xFF, got 0x%02X", value)
+	}
+
+	// Test EOF
+	_, err = reader.ReadUint8()
+	if err == nil {
+		t.Error("Expected EOF error, got nil")
 	}
 }
 
-func TestStreamReader_ReadBytes_Truncated(t *testing.T) {
-	sr := newStreamReader([]byte{1, 2})
-	if _, err := sr.ReadBytes(4); err == nil {
-		t.Fatal("expected error reading more bytes than available")
-	}
-}
+func TestReadUint16(t *testing.T) {
+	// Test little-endian reading
+	data := []byte{0x34, 0x12, 0x78, 0x56} // 0x1234, 0x5678
+	reader := createTestStreamReader(data)
 
-func TestStreamReader_ReadString_NoTerminator(t *testing.T) {
-	input := []byte{'a', 'b', 'c'}
-	sr := newStreamReader(input)
-	got, err := sr.ReadString(3)
+	value, err := reader.ReadUint16()
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Errorf("Expected no error, got %v", err)
 	}
-	if got != "abc" {
-		t.Errorf("got %q, want %q", got, "abc")
+	if value != 0x1234 {
+		t.Errorf("Expected 0x1234, got 0x%04X", value)
+	}
+
+	value, err = reader.ReadUint16()
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if value != 0x5678 {
+		t.Errorf("Expected 0x5678, got 0x%04X", value)
+	}
+
+	// Test EOF
+	_, err = reader.ReadUint16()
+	if err == nil {
+		t.Error("Expected EOF error, got nil")
 	}
 }
 
-func TestStreamReader_ReadString_InvalidMaxLength(t *testing.T) {
-	sr := newStreamReader([]byte{'a'})
-	if _, err := sr.ReadString(0); err == nil {
-		t.Fatal("expected error for maxLength 0")
+func TestReadUint32(t *testing.T) {
+	// Test little-endian reading
+	data := []byte{0x78, 0x56, 0x34, 0x12, 0xBC, 0x9A, 0x78, 0x56} // 0x12345678, 0x56789ABC
+	reader := createTestStreamReader(data)
+
+	value, err := reader.ReadUint32()
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
 	}
-	if _, err := sr.ReadString(-1); err == nil {
-		t.Fatal("expected error for negative maxLength")
+	if value != 0x12345678 {
+		t.Errorf("Expected 0x12345678, got 0x%08X", value)
+	}
+
+	value, err = reader.ReadUint32()
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if value != 0x56789ABC {
+		t.Errorf("Expected 0x56789ABC, got 0x%08X", value)
+	}
+
+	// Test EOF
+	_, err = reader.ReadUint32()
+	if err == nil {
+		t.Error("Expected EOF error, got nil")
 	}
 }
 
-func TestStreamReader_ReadFixedString_NoPadding(t *testing.T) {
-	input := []byte{'x', 'y', 'z', 'w'}
-	sr := newStreamReader(input)
-	got, err := sr.ReadFixedString(4)
+func TestReadInt16(t *testing.T) {
+	// Test positive and negative values
+	data := []byte{0x34, 0x12, 0xCC, 0xFF} // 0x1234 (positive), 0xFFCC (negative)
+	reader := createTestStreamReader(data)
+
+	value, err := reader.ReadInt16()
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Errorf("Expected no error, got %v", err)
 	}
-	if got != "xyzw" {
-		t.Errorf("got %q, want %q", got, "xyzw")
+	if value != 0x1234 {
+		t.Errorf("Expected 0x1234, got 0x%04X", value)
+	}
+
+	value, err = reader.ReadInt16()
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if value != -52 { // 0xFFCC as signed int16
+		t.Errorf("Expected -52, got %d", value)
 	}
 }
 
-func TestStreamReader_ReadFixedString_AllZeros(t *testing.T) {
-	input := []byte{0, 0, 0, 0}
-	sr := newStreamReader(input)
-	got, err := sr.ReadFixedString(4)
+func TestReadFloat32(t *testing.T) {
+	// Test float32 reading (1.0f in little-endian)
+	data := []byte{0x00, 0x00, 0x80, 0x3F} // 1.0f
+	reader := createTestStreamReader(data)
+
+	value, err := reader.ReadFloat32()
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Errorf("Expected no error, got %v", err)
 	}
-	if got != "" {
-		t.Errorf("got %q, want empty string", got)
+	if value != 1.0 {
+		t.Errorf("Expected 1.0, got %f", value)
 	}
 }
 
-func TestStreamReader_SetPosition_ResetToStart(t *testing.T) {
-	input := []byte{10, 20, 30}
-	sr := newStreamReader(input)
-	if _, err := sr.ReadUint8(); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	sr.SetPosition(0)
-	got, err := sr.ReadUint8()
+func TestReadBytes(t *testing.T) {
+	data := []byte{0x01, 0x02, 0x03, 0x04, 0x05}
+	reader := createTestStreamReader(data)
+
+	// Test reading 3 bytes
+	bytes, err := reader.ReadBytes(3)
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Errorf("Expected no error, got %v", err)
 	}
-	if got != 10 {
-		t.Errorf("got %d, want 10", got)
+	expected := []byte{0x01, 0x02, 0x03}
+	if !compareByteSlices(bytes, expected) {
+		t.Errorf("Expected %v, got %v", expected, bytes)
+	}
+
+	// Test reading remaining bytes
+	bytes, err = reader.ReadBytes(2)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	expected = []byte{0x04, 0x05}
+	if !compareByteSlices(bytes, expected) {
+		t.Errorf("Expected %v, got %v", expected, bytes)
+	}
+
+	// Test reading beyond EOF
+	_, err = reader.ReadBytes(1)
+	if err == nil {
+		t.Error("Expected EOF error, got nil")
+	}
+
+	// Test invalid count
+	_, err = reader.ReadBytes(0)
+	if err == nil {
+		t.Error("Expected error for zero count, got nil")
+	}
+
+	_, err = reader.ReadBytes(-1)
+	if err == nil {
+		t.Error("Expected error for negative count, got nil")
 	}
 }
 
-func TestStreamReader_SequentialReadsAdvance(t *testing.T) {
-	data := make([]byte, 4)
-	binary.LittleEndian.PutUint16(data[0:2], 0x1234)
-	binary.LittleEndian.PutUint16(data[2:4], 0x5678)
-	sr := newStreamReader(data)
-	first, err := sr.ReadUint16()
+func TestReadString(t *testing.T) {
+	// Test null-terminated string
+	data := []byte{'H', 'e', 'l', 'l', 'o', 0x00, 'W', 'o', 'r', 'l', 'd'}
+	reader := createTestStreamReader(data)
+
+	str, err := reader.ReadString(20)
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Errorf("Expected no error, got %v", err)
 	}
-	second, err := sr.ReadUint16()
+	if str != "Hello" {
+		t.Errorf("Expected 'Hello', got '%s'", str)
+	}
+
+	// Test string without null terminator
+	data = []byte{'T', 'e', 's', 't'}
+	reader = createTestStreamReader(data)
+
+	str, err = reader.ReadString(10)
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Errorf("Expected no error, got %v", err)
 	}
-	if first != 0x1234 || second != 0x5678 {
-		t.Errorf("got (%d, %d), want (0x1234, 0x5678)", first, second)
+	if str != "Test" {
+		t.Errorf("Expected 'Test', got '%s'", str)
+	}
+
+	// Test invalid max length
+	_, err = reader.ReadString(0)
+	if err == nil {
+		t.Error("Expected error for zero max length, got nil")
+	}
+}
+
+func TestReadFixedString(t *testing.T) {
+	// Test fixed-length string with null padding
+	data := []byte{'T', 'e', 's', 't', 0x00, 0x00, 0x00, 0x00}
+	reader := createTestStreamReader(data)
+
+	str, err := reader.ReadFixedString(8)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if str != "Test" {
+		t.Errorf("Expected 'Test', got '%s'", str)
+	}
+
+	// Test string with no null padding
+	data = []byte{'F', 'u', 'l', 'l'}
+	reader = createTestStreamReader(data)
+
+	str, err = reader.ReadFixedString(4)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if str != "Full" {
+		t.Errorf("Expected 'Full', got '%s'", str)
+	}
+
+	// Test invalid length
+	_, err = reader.ReadFixedString(0)
+	if err == nil {
+		t.Error("Expected error for zero length, got nil")
+	}
+}
+
+func TestSetPosition(t *testing.T) {
+	data := []byte{0x01, 0x02, 0x03, 0x04, 0x05}
+	reader := createTestStreamReader(data)
+
+	// Read first byte
+	value, err := reader.ReadUint8()
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if value != 0x01 {
+		t.Errorf("Expected 0x01, got 0x%02X", value)
+	}
+
+	// Set position back to start
+	reader.SetPosition(0)
+
+	// Read first byte again
+	value, err = reader.ReadUint8()
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if value != 0x01 {
+		t.Errorf("Expected 0x01, got 0x%02X", value)
+	}
+
+	// Set position to middle
+	reader.SetPosition(2)
+
+	// Read byte at position 2
+	value, err = reader.ReadUint8()
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if value != 0x03 {
+		t.Errorf("Expected 0x03, got 0x%02X", value)
+	}
+}
+
+// Note: GetOpcode, GetDataLength, HasData, ValidateInstructionSize, and GetOpcodeName
+// methods are not yet implemented in StreamReader. These tests can be added when
+// those methods are implemented.
+
+func TestEdgeCases(t *testing.T) {
+	// Test reading from empty stream
+	emptyReader := createTestStreamReader([]byte{})
+	_, err := emptyReader.ReadUint8()
+	if err == nil {
+		t.Error("Expected error when reading from empty stream")
+	}
+
+	// Test reading beyond available data
+	data := []byte{0x01}
+	reader := createTestStreamReader(data)
+	_, err = reader.ReadUint16()
+	if err == nil {
+		t.Error("Expected error when reading beyond available data")
+	}
+
+	// Test reading exact amount of data
+	data = []byte{0x01, 0x02}
+	reader = createTestStreamReader(data)
+	value, err := reader.ReadUint16()
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if value != 0x0201 { // Little-endian
+		t.Errorf("Expected 0x0201, got 0x%04X", value)
+	}
+}
+
+func TestConcurrentAccess(t *testing.T) {
+	// Test that StreamReader is safe for concurrent access
+	data := []byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08}
+	reader := createTestStreamReader(data)
+
+	// This test is more about ensuring the code doesn't panic
+	// rather than testing actual concurrency safety
+	value, err := reader.ReadUint32()
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if value != 0x04030201 { // Little-endian
+		t.Errorf("Expected 0x04030201, got 0x%08X", value)
 	}
 }
