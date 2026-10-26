@@ -3,6 +3,7 @@ package fileio
 // .md1 - 3D model file
 
 import (
+	"fmt"
 	"io"
 )
 
@@ -115,6 +116,11 @@ func LoadMD1Stream(r io.ReaderAt, fileLength int64) (*MD1Output, error) {
 	md1Header := MD1Header{}
 	if err := fileStreamReader.ReadData(&md1Header); err != nil {
 		return nil, err
+	}
+
+	// Guard against corrupt or hostile headers causing huge allocations.
+	if md1Header.NumObj > 1000 {
+		return nil, fmt.Errorf("MD1 NumObj too large: %d", md1Header.NumObj)
 	}
 
 	// Read header offsets
