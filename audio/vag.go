@@ -1,11 +1,23 @@
 package audio
 
 // DecodeVAG decodes PlayStation SPU ADPCM (VAG) data into 16-bit PCM samples.
-// The input is expected to be a sequence of 16-byte ADPCM blocks.
+// This variant uses low nibble first and carries predictor state across blocks.
 func DecodeVAG(data []byte) []int16 {
+	// Some VAB waveforms appear to have a 16-byte lead-in.
+	if len(data) > 16 {
+		data = data[16:]
+	}
+	return decodeVAG(data, false)
+}
+
+// DecodeVAGReset is an experimental variant that resets predictor state per block.
+func DecodeVAGReset(data []byte) []int16 {
+	return decodeVAG(data, true)
+}
+
+func decodeVAG(data []byte, resetPerBlock bool) []int16 {
 	samples := make([]int16, 0, (len(data)/16)*28)
 
-	// SPU-ADPCM filter coefficients.
 	filterCoeff := [5][2]int{
 		{0, 0},
 		{60, 0},
@@ -14,12 +26,11 @@ func DecodeVAG(data []byte) []int16 {
 		{122, -60},
 	}
 
-	var prev1, prev2 int
+	prev1, prev2 := 0, 0
 
 	for offset := 0; offset+16 <= len(data); offset += 16 {
 		block := data[offset : offset+16]
 
-		// Skip IRQ terminator blocks.
 		if block[1] == 0x07 {
 			break
 		}
@@ -32,12 +43,16 @@ func DecodeVAG(data []byte) []int16 {
 		f0 := filterCoeff[filter][0]
 		f1 := filterCoeff[filter][1]
 
+		if resetPerBlock {
+			prev1, prev2 = 0, 0
+		}
+
 		for i := 0; i < 28; i++ {
 			var nibble int
 			if i%2 == 0 {
-				nibble = int(block[2+i/2] >> 4)
-			} else {
 				nibble = int(block[2+i/2] & 0x0F)
+			} else {
+				nibble = int(block[2+i/2] >> 4)
 			}
 			if nibble >= 8 {
 				nibble -= 16
