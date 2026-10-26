@@ -22,6 +22,20 @@ func (scriptDef *ScriptDef) ScriptPlcMotion(lineData []byte, gameDef *game.GameD
 	return 1
 }
 
+func (scriptDef *ScriptDef) ScriptPlcNeck(lineData []byte, gameDef *game.GameDef) int {
+	byteArr := bytes.NewBuffer(lineData)
+	instruction := fileio.ScriptInstrPlcNeck{}
+	binary.Read(byteArr, binary.LittleEndian, &instruction)
+
+	if gameDef != nil && gameDef.Player != nil {
+		gameDef.Player.NeckX = instruction.NeckX
+		gameDef.Player.NeckY = instruction.NeckY
+		gameDef.Player.NeckZ = instruction.NeckZ
+	}
+
+	return 1
+}
+
 func (scriptDef *ScriptDef) ScriptPlcDest(lineData []byte, gameDef *game.GameDef) int {
 	byteArr := bytes.NewBuffer(lineData)
 	instruction := fileio.ScriptInstrPlcDest{}
@@ -31,16 +45,6 @@ func (scriptDef *ScriptDef) ScriptPlcDest(lineData []byte, gameDef *game.GameDef
 		gameDef.Player.DestX = instruction.DestX
 		gameDef.Player.DestZ = instruction.DestZ
 	}
-
-	return 1
-}
-
-func (scriptDef *ScriptDef) ScriptPlcNeck(lineData []byte) int {
-	byteArr := bytes.NewBuffer(lineData)
-	instruction := fileio.ScriptInstrPlcNeck{}
-	binary.Read(byteArr, binary.LittleEndian, &instruction)
-
-	// TODO: implement
 
 	return 1
 }

@@ -29,6 +29,9 @@ type Player struct {
 	Motion        int
 	DestX         int16
 	DestZ         int16
+	NeckX         int16
+	NeckY         int16
+	NeckZ         int16
 }
 
 // Position is in world space
