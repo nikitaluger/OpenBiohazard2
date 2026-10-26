@@ -73,3 +73,10 @@ Windows is case-insensitive, but folder names still need to match the expected n
 - https://github.com/yanmingsohu/Biohazard2
 - https://github.com/MeganGrass/BioScript
 - https://github.com/mortician
+
+### Audio references
+
+- PS1 SPU ADPCM: https://problemkaputt.de/psxspx-spu-adpcm-samples.htm
+- SPU ADPCM overview: https://jsgroth.dev/blog/posts/ps1-spu-part-1
+- Audio library: https://github.com/gopxl/beep
+- Audio conversion: https://ffmpeg.org
