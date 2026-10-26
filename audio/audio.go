@@ -23,6 +23,7 @@ func NewAudioManager() *AudioManager {
 // BGMNames maps BGM ids observed in scripts to human-readable names.
 var BGMNames = map[int]string{
 	0: "Main",
+	1: "Track 1 (unknown)",
 }
 
 // BGMTypeName describes the volume target type.
