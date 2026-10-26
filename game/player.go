@@ -27,6 +27,8 @@ type Player struct {
 	RotationAngle float32
 	PoseNumber    int
 	Motion        int
+	DestX         int16
+	DestZ         int16
 }
 
 // Position is in world space

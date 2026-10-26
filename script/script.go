@@ -234,7 +234,7 @@ func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 	case fileio.OP_PLC_MOTION: // 0x3f
 		returnValue = scriptDef.ScriptPlcMotion(lineData, gameDef)
 	case fileio.OP_PLC_DEST: // 0x40
-		returnValue = scriptDef.ScriptPlcDest(lineData)
+		returnValue = scriptDef.ScriptPlcDest(lineData, gameDef)
 	case fileio.OP_PLC_NECK: // 0x41
 		returnValue = scriptDef.ScriptPlcNeck(lineData)
 	case fileio.OP_SCE_EM_SET: // 0x44

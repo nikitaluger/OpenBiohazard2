@@ -22,12 +22,15 @@ func (scriptDef *ScriptDef) ScriptPlcMotion(lineData []byte, gameDef *game.GameD
 	return 1
 }
 
-func (scriptDef *ScriptDef) ScriptPlcDest(lineData []byte) int {
+func (scriptDef *ScriptDef) ScriptPlcDest(lineData []byte, gameDef *game.GameDef) int {
 	byteArr := bytes.NewBuffer(lineData)
 	instruction := fileio.ScriptInstrPlcDest{}
 	binary.Read(byteArr, binary.LittleEndian, &instruction)
 
-	// TODO: implement
+	if gameDef != nil && gameDef.Player != nil {
+		gameDef.Player.DestX = instruction.DestX
+		gameDef.Player.DestZ = instruction.DestZ
+	}
 
 	return 1
 }
