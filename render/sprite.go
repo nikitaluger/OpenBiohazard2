@@ -19,6 +19,9 @@ type SpriteGroupEntity struct {
 	VertexArrayObject     uint32
 	VertexBufferObject    uint32
 
+	// Per-sprite vertex counts, in the same order as TextureIdPool.
+	SpriteVertexCounts []int
+
 	// Animation state for the currently displayed sprite frame.
 	totalRuntime float64
 	curFrame     int
@@ -48,6 +51,7 @@ func NewSpriteGroupEntity(spriteData []fileio.SpriteData) *SpriteGroupEntity {
 		VertexBuffer:          make([]float32, 0),
 		VertexArrayObject:     vao,
 		VertexBufferObject:    vbo,
+		SpriteVertexCounts:    make([]int, 0),
 	}
 }
 
@@ -119,6 +123,7 @@ func (renderDef *RenderDef) AddSprite(sprite fileio.ScriptInstrSceEsprOn) {
 	// Generate billboard sprite using geometry package
 	rect := geometry.NewBillboardSprite(spriteCenter, spriteWidth, viewMatrix)
 	renderDef.SceneSystem.SpriteGroupEntity.VertexBuffer = append(renderDef.SceneSystem.SpriteGroupEntity.VertexBuffer, rect.VertexBuffer...)
+	renderDef.SceneSystem.SpriteGroupEntity.SpriteVertexCounts = append(renderDef.SceneSystem.SpriteGroupEntity.SpriteVertexCounts, len(rect.VertexBuffer))
 }
 
 // advanceSpriteFrame computes the next animation-time accumulator and frame index.
@@ -144,22 +149,43 @@ func RenderSprites(r *RenderDef, spriteGroupEntity *SpriteGroupEntity, timeElaps
 		return
 	}
 
-	// TODO: Calculate index based on id
-	spriteIndex := 0
+	// Keep a single animation timer, but render every sprite that has geometry.
+	spriteGroupEntity.totalRuntime += timeElapsedSeconds
 
-	spriteGroupEntity.totalRuntime, spriteGroupEntity.curFrame = advanceSpriteFrame(
-		spriteGroupEntity.totalRuntime, spriteGroupEntity.curFrame, len(textureIds[spriteIndex]), timeElapsedSeconds)
+	vertexOffset := 0
+	for i := range textureIds {
+		count := 0
+		if i < len(spriteGroupEntity.SpriteVertexCounts) {
+			count = spriteGroupEntity.SpriteVertexCounts[i]
+		}
+		if count == 0 || len(textureIds[i]) == 0 {
+			vertexOffset += count
+			continue
+		}
 
-	// Create render config for 2D sprite (position + texture)
-	config := r.Renderer.Create2DEntityConfig(
-		spriteGroupEntity.VertexArrayObject,
-		spriteGroupEntity.VertexBufferObject,
-		vertexBuffer,
-		textureIds[spriteIndex][spriteGroupEntity.curFrame],
-		nil, // No model matrix for sprites
-		RENDER_TYPE_SPRITE,
-	)
+		if spriteGroupEntity.totalRuntime > SPRITE_FRAME_TIME {
+			spriteGroupEntity.totalRuntime = 0
+			spriteGroupEntity.curFrame++
+			if spriteGroupEntity.curFrame >= len(textureIds[i]) {
+				spriteGroupEntity.curFrame = 0
+			}
+		}
 
-	// Render the sprite
-	r.Renderer.RenderEntity(config)
+		frame := spriteGroupEntity.curFrame
+		if frame >= len(textureIds[i]) {
+			frame = 0
+		}
+
+		config := r.Renderer.Create2DEntityConfig(
+			spriteGroupEntity.VertexArrayObject,
+			spriteGroupEntity.VertexBufferObject,
+			vertexBuffer[vertexOffset:vertexOffset+count],
+			textureIds[i][frame],
+			nil,
+			RENDER_TYPE_SPRITE,
+		)
+		r.Renderer.RenderEntity(config)
+
+		vertexOffset += count
+	}
 }
