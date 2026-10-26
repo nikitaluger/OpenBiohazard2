@@ -32,6 +32,7 @@
   - [x] Integrate audio library
   - [x] Decode VAG ADPCM (verified)
   - [x] Create VAG test tool (vagtest)
+  - [x] Play real BGM from SAP files
   - [ ] Map BGM/SFX IDs to tracks
   - [ ] Parse VAB data
   - [ ] Looping and volume control
