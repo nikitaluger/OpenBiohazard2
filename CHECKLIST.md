@@ -30,4 +30,6 @@
 - [ ] Implement enemy AI / models
 - [ ] Implement door models and transitions
 - [x] Implement inventory item use
-- [ ] Implement puzzles
+## Notes
+- Tests added so far are mostly scaffolding (error paths and crash guards).
+- They do not yet verify full parsing correctness or game behavior.
