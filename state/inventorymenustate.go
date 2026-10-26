@@ -65,6 +65,8 @@ func HandleInventory(inventoryStateInput *InventoryStateInput, gameStateManager 
 			} else if inventoryMenu.IsTopMenuCursorOnItems() {
 				inventoryMenu.SetEditItemScreen()
 			}
+		} else if inventoryMenu.IsEditingItemScreen() {
+			inventoryManager.UseItem(inventoryMenu.Status_InventoryMainCursor)
 		}
 	}
 

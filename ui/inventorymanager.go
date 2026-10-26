@@ -47,6 +47,26 @@ func (im *InventoryManager) ResetInventoryTime() {
 	im.totalInventoryTime = 0
 }
 
+// UseItem consumes one use of the item in the given slot.
+// It returns true if an item was used.
+func (im *InventoryManager) UseItem(slot int) bool {
+	if slot < 0 || slot >= len(im.playerInventoryItems) {
+		return false
+	}
+	item := &im.playerInventoryItems[slot]
+	if item.Id == 0 {
+		return false
+	}
+	if item.Num > 0 {
+		item.Num--
+	}
+	if item.Num <= 0 {
+		item.Id = 0
+		item.Num = 0
+		item.Size = 0
+	}
+	return true
+}
 // GetPlayerInventoryItems returns a copy of the player's inventory items
 func (im *InventoryManager) GetPlayerInventoryItems() []InventoryItem {
 	// Return a copy to prevent external modification
