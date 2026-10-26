@@ -30,7 +30,10 @@
   - [x] Add audio manager placeholder
   - [x] Wire BGM control opcode
   - [x] Integrate audio library
-  - [ ] Parse and play VAB/BGM data
+  - [ ] Map BGM/SFX IDs to tracks
+  - [ ] Parse VAB data
+  - [ ] Looping and volume control
+  - [ ] SFX triggers
 - [ ] Implement enemy AI / models
   - [x] Add enemy AI state scaffold
   - [ ] Render enemy models
