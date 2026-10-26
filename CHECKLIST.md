@@ -29,5 +29,5 @@
 - [ ] Implement audio playback
 - [ ] Implement enemy AI / models
 - [ ] Implement door models and transitions
-- [ ] Implement inventory item use
+- [x] Implement inventory item use
 - [ ] Implement puzzles
