@@ -46,6 +46,9 @@ func DeleteDebugEntities(debugEntities []*DebugEntity) {
 }
 
 func RenderCameraSwitches(r *RenderDef, cameraSwitchDebugEntity *DebugEntity) {
+	if cameraSwitchDebugEntity == nil {
+		return
+	}
 	// Use ShaderSystem method for better performance
 	r.ShaderSystem.SetRenderType(RENDER_TYPE_DEBUG)
 
@@ -54,6 +57,9 @@ func RenderCameraSwitches(r *RenderDef, cameraSwitchDebugEntity *DebugEntity) {
 
 func RenderDebugEntities(r *RenderDef, debugEntities []*DebugEntity) {
 	for _, debugEntity := range debugEntities {
+		if debugEntity == nil {
+			continue
+		}
 		entityVertexBuffer := debugEntity.VertexBuffer
 		if len(entityVertexBuffer) == 0 {
 			continue
@@ -77,6 +83,9 @@ func RenderDebugEntities(r *RenderDef, debugEntities []*DebugEntity) {
 }
 
 func BuildAllDebugEntities(gameWorld *world.GameWorld) []*DebugEntity {
+	if gameWorld == nil || gameWorld.GameRoom == nil || gameWorld.AotManager == nil {
+		return make([]*DebugEntity, 0)
+	}
 	debugEntities := make([]*DebugEntity, 0)
 	debugEntities = append(debugEntities, NewDoorTriggerDebugEntity(gameWorld.AotManager.Doors))
 	debugEntities = append(debugEntities, NewCollisionDebugEntity(gameWorld.GameRoom.CollisionEntities))

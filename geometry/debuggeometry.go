@@ -80,6 +80,14 @@ func NewCollisionDebugEntity(collisionEntities []fileio.CollisionEntity) []float
 			center := mgl32.Vec3{float32(entity.X) + minorAxis, 0, float32(entity.Z) + majorAxis}
 			ellipse := NewEllipse(center, majorAxis, minorAxis, false)
 			vertexBuffer = append(vertexBuffer, ellipse.VertexBuffer...)
+		case 9, 10:
+			// Climb rectangles
+			vertex1 := mgl32.Vec3{float32(entity.X), 0, float32(entity.Z)}
+			vertex2 := mgl32.Vec3{float32(entity.X), 0, float32(entity.Z + entity.Density)}
+			vertex3 := mgl32.Vec3{float32(entity.X + entity.Width), 0, float32(entity.Z + entity.Density)}
+			vertex4 := mgl32.Vec3{float32(entity.X + entity.Width), 0, float32(entity.Z)}
+			rect := NewDebugRectangle(vertex1, vertex2, vertex3, vertex4)
+			vertexBuffer = append(vertexBuffer, rect.VertexBuffer...)
 		}
 	}
 	return vertexBuffer
@@ -89,6 +97,9 @@ func NewCollisionDebugEntity(collisionEntities []fileio.CollisionEntity) []float
 func NewCameraSwitchDebugVertexBuffer(curCameraId int, cameraSwitches []fileio.RVDHeader, cameraSwitchTransitions map[int][]int) []float32 {
 	vertexBuffer := make([]float32, 0)
 	for _, regionIndex := range cameraSwitchTransitions[curCameraId] {
+		if regionIndex < 0 || regionIndex >= len(cameraSwitches) {
+			continue
+		}
 		cameraSwitch := cameraSwitches[regionIndex]
 		corners := [4][]float32{
 			{float32(cameraSwitch.X1), float32(cameraSwitch.Z1)},
@@ -107,13 +118,12 @@ func NewSlopedSurfacesDebugVertexBuffer(collisionEntities []fileio.CollisionEnti
 	vertexBuffer := make([]float32, 0)
 	for _, entity := range collisionEntities {
 		switch entity.Shape {
-		case 11:
-			// Ramp
+		case 11, 12:
+			// Ramp / Stairs
 			rect := NewSlopedRectangle(entity)
-			vertexBuffer = append(vertexBuffer, rect.VertexBuffer...)
-		case 12:
-			// Stairs
-			rect := NewSlopedRectangle(entity)
+			if rect == nil {
+				continue
+			}
 			vertexBuffer = append(vertexBuffer, rect.VertexBuffer...)
 		}
 	}
