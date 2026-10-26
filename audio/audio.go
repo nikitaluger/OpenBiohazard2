@@ -1,14 +1,19 @@
 package audio
 
 import (
+	"bytes"
+	"fmt"
 	"time"
 
 	"github.com/gopxl/beep"
 	"github.com/gopxl/beep/generators"
 	"github.com/gopxl/beep/speaker"
+	"github.com/gopxl/beep/wav"
+
+	"github.com/OpenBiohazard2/OpenBiohazard2/fileio"
 )
 
-// AudioManager wraps basic audio playback using beep.
+// AudioManager handles basic audio playback.
 type AudioManager struct {
 	sampleRate beep.SampleRate
 
@@ -32,25 +37,10 @@ func NewAudioManager() *AudioManager {
 	}
 }
 
-// SetVolume stores a volume level for a BGM volume target.
-func (a *AudioManager) SetVolume(target uint8, left, right uint8) {
-	level := (float64(left) + float64(right)) / 2.0 / 127.0
-	switch target {
-	case 0:
-		a.mainVolume = level
-	case 1:
-		a.prog0Volume = level
-	case 2:
-		a.prog1Volume = level
-	case 3:
-		a.prog2Volume = level
-	}
-}
-
 // BGMNames maps BGM ids observed in scripts to human-readable names.
 var BGMNames = map[int]string{
 	0: "Main",
-	1: "Track 1 (unknown)",
+	1: "Track 1",
 }
 
 // BGMTypeName describes the volume target type.
@@ -68,14 +58,41 @@ func BGMTypeName(t uint8) string {
 		return "UNKNOWN"
 	}
 }
-// PlayBGM plays a short placeholder tone for a BGM id.
+
+// SetVolume stores a volume level for a BGM volume target.
+func (a *AudioManager) SetVolume(target uint8, left, right uint8) {
+	level := (float64(left) + float64(right)) / 2.0 / 127.0
+	switch target {
+	case 0:
+		a.mainVolume = level
+	case 1:
+		a.prog0Volume = level
+	case 2:
+		a.prog1Volume = level
+	case 3:
+		a.prog2Volume = level
+	}
+}
+
+// PlayBGM plays a BGM track by id using SAP files.
 func (a *AudioManager) PlayBGM(id int) {
-	freq := 440.0 + float64(id*10)
-	sine, err := generators.SineTone(a.sampleRate, freq)
+	filename := fmt.Sprintf("data/Common/Sound/bgm/MAIN%02X.SAP", id)
+	sap, err := fileio.LoadSAPFile(filename)
 	if err != nil {
+		// Fall back to a placeholder tone if the file is missing.
+		a.playTone(440+float64(id*10), time.Second)
 		return
 	}
-	speaker.Play(beep.Take(a.sampleRate.N(time.Second), sine))
+
+	streamer, format, err := wav.Decode(bytes.NewReader(sap.AudioData))
+	if err != nil {
+		a.playTone(440+float64(id*10), time.Second)
+		return
+	}
+
+	speaker.Clear()
+	speaker.Play(beep.Loop(-1, streamer))
+	_ = format
 }
 
 // StopBGM stops all currently playing audio.
@@ -85,9 +102,13 @@ func (a *AudioManager) StopBGM() {
 
 // PlaySFX plays a short placeholder tone for a sound effect id.
 func (a *AudioManager) PlaySFX(id int) {
-	sine, err := generators.SineTone(a.sampleRate, 880)
+	a.playTone(880, 200*time.Millisecond)
+}
+
+func (a *AudioManager) playTone(freq float64, duration time.Duration) {
+	sine, err := generators.SineTone(a.sampleRate, freq)
 	if err != nil {
 		return
 	}
-	speaker.Play(beep.Take(a.sampleRate.N(200*time.Millisecond), sine))
+	speaker.Play(beep.Take(a.sampleRate.N(duration), sine))
 }
