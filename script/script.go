@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/OpenBiohazard2/OpenBiohazard2/audio"
 	"github.com/OpenBiohazard2/OpenBiohazard2/fileio"
 	"github.com/OpenBiohazard2/OpenBiohazard2/game"
 	"github.com/OpenBiohazard2/OpenBiohazard2/render"
@@ -418,8 +419,9 @@ func (scriptDef *ScriptDef) ScriptSceBgmControl(lineData []byte, gameDef *game.G
 	binary.Read(byteArr, binary.LittleEndian, &instruction)
 
 	if gameDef != nil && gameDef.Audio != nil {
-		fmt.Printf("BGM control: id=%d op=%d type=%d volL=%d volR=%d\n",
-			instruction.Id, instruction.Operation, instruction.Type,
+		fmt.Printf("BGM control: id=%d (%s) op=%d type=%d (%s) volL=%d volR=%d\n",
+			instruction.Id, audio.BGMNames[int(instruction.Id)],
+			instruction.Operation, instruction.Type, audio.BGMTypeName(instruction.Type),
 			instruction.LeftVolume, instruction.RightVolume)
 
 		// Placeholder: map the script's BGM id to the audio manager.

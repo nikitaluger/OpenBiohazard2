@@ -20,6 +20,26 @@ func NewAudioManager() *AudioManager {
 	return &AudioManager{sampleRate: sr}
 }
 
+// BGMNames maps BGM ids observed in scripts to human-readable names.
+var BGMNames = map[int]string{
+	0: "Main",
+}
+
+// BGMTypeName describes the volume target type.
+func BGMTypeName(t uint8) string {
+	switch t {
+	case 0:
+		return "MAIN_VOL"
+	case 1:
+		return "PROG0_VOL"
+	case 2:
+		return "PROG1_VOL"
+	case 3:
+		return "PROG2_VOL"
+	default:
+		return "UNKNOWN"
+	}
+}
 // PlayBGM plays a short placeholder tone for a BGM id.
 func (a *AudioManager) PlayBGM(id int) {
 	freq := 440.0 + float64(id*10)
