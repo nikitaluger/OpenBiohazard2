@@ -2,15 +2,11 @@ package audio
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
-	"path/filepath"
 	"time"
 
 	"github.com/gopxl/beep"
 	"github.com/gopxl/beep/generators"
 	"github.com/gopxl/beep/speaker"
-	"github.com/gopxl/beep/wav"
 
 	"github.com/OpenBiohazard2/OpenBiohazard2/fileio"
 )
@@ -76,19 +72,34 @@ func (a *AudioManager) SetVolume(target uint8, left, right uint8) {
 	}
 }
 
-// PlayBGM plays a BGM track by id, converting SAP (ADPCM) to PCM via ffmpeg.
+// PlayBGM plays a BGM track by id using MS-ADPCM decoder (no ffmpeg).
 func (a *AudioManager) PlayBGM(id int) {
 	filename := fmt.Sprintf("data/Common/Sound/bgm/MAIN%02X.SAP", id)
-	streamer, err := a.loadSAPStreamer(filename)
+	sap, err := fileio.LoadSAPFile(filename)
 	if err != nil {
-		fmt.Printf("PlayBGM: failed to load %s: %v\n", filename, err)
+		fmt.Printf("PlayBGM: failed to read %s: %v\n", filename, err)
 		a.playTone(440+float64(id*10), time.Second)
 		return
 	}
 
-	fmt.Printf("PlayBGM: playing %s\n", filename)
+	wave, ok := DecodeSAP(sap.AudioData)
+	if !ok {
+		fmt.Printf("PlayBGM: failed to decode %s\n", filename)
+		a.playTone(440+float64(id*10), time.Second)
+		return
+	}
+
+	streamer := &pcmStreamer{samples: wave.Samples}
+	buf := beep.NewBuffer(beep.Format{
+		SampleRate:  beep.SampleRate(wave.SamplesPerSec),
+		NumChannels: wave.Channels,
+		Precision:   2,
+	})
+	buf.Append(streamer)
+
+	fmt.Printf("PlayBGM: playing %s (%d Hz, %d ch, %d samples)\n", filename, wave.SamplesPerSec, wave.Channels, len(wave.Samples))
 	speaker.Clear()
-	speaker.Play(beep.Loop(-1, streamer))
+	speaker.Play(beep.Loop(-1, buf.Streamer(0, buf.Len())))
 }
 
 // StopBGM stops all currently playing audio.
@@ -124,41 +135,4 @@ func (a *AudioManager) playTone(freq float64, duration time.Duration) {
 		return
 	}
 	speaker.Play(beep.Take(a.sampleRate.N(duration), sine))
-}
-
-func (a *AudioManager) loadSAPStreamer(filename string) (beep.StreamSeeker, error) {
-	sap, err := fileio.LoadSAPFile(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	tmpDir := os.TempDir()
-	inPath := filepath.Join(tmpDir, "sap_input.wav")
-	outPath := filepath.Join(tmpDir, "sap_output.wav")
-
-	if err := os.WriteFile(inPath, sap.AudioData, 0644); err != nil {
-		return nil, err
-	}
-
-	cmd := exec.Command("ffmpeg", "-y", "-i", inPath, outPath)
-	if err := cmd.Run(); err != nil {
-		return nil, err
-	}
-
-	f, err := os.Open(outPath)
-	if err != nil {
-		return nil, err
-	}
-	streamer, format, err := wav.Decode(f)
-	if err != nil {
-		f.Close()
-		return nil, err
-	}
-
-	buf := beep.NewBuffer(format)
-	buf.Append(streamer)
-	streamer.Close()
-	f.Close()
-
-	return buf.Streamer(0, buf.Len()), nil
 }

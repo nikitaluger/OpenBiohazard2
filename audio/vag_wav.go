@@ -16,16 +16,17 @@ type pcmStreamer struct {
 func (p *pcmStreamer) Stream(samples [][2]float64) (int, bool) {
 	n := 0
 	for i := range samples {
-		if p.pos >= len(p.samples) {
+		if p.pos+1 >= len(p.samples) {
 			break
 		}
-		v := float64(p.samples[p.pos]) / 32768.0
-		samples[i][0] = v
-		samples[i][1] = v
-		p.pos++
+		vL := float64(p.samples[p.pos]) / 32768.0
+		vR := float64(p.samples[p.pos+1]) / 32768.0
+		samples[i][0] = vL
+		samples[i][1] = vR
+		p.pos += 2
 		n++
 	}
-	return n, n == len(samples)
+	return n, p.pos < len(p.samples)
 }
 
 func (p *pcmStreamer) Err() error { return nil }
