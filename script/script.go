@@ -200,8 +200,8 @@ func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 		returnValue = scriptDef.ScriptBreak(curScriptThread, lineData)
 	case fileio.OP_CHECK: // 0x21
 		returnValue = scriptDef.ScriptCheckBit(lineData)
-	case fileio.OP_SET_BIT: // 0x22
-		returnValue = scriptDef.ScriptSetBit(lineData)
+	case fileio.OP_SE_ON: // 0x36
+		returnValue = scriptDef.ScriptSeOn(lineData)
 	case fileio.OP_COMPARE: // 0x23
 		returnValue = scriptDef.ScriptCompare(lineData)
 	case fileio.OP_SAVE: // 0x24
@@ -435,5 +435,9 @@ func (scriptDef *ScriptDef) ScriptSceBgmControl(lineData []byte, gameDef *game.G
 		}
 	}
 
+	return 1
+}
+func (scriptDef *ScriptDef) ScriptSeOn(lineData []byte) int {
+	fmt.Printf("SE_ON: % x\n", lineData)
 	return 1
 }
