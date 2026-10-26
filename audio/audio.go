@@ -2,6 +2,8 @@ package audio
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"time"
 
 	"github.com/gopxl/beep"
@@ -107,10 +109,35 @@ func (a *AudioManager) StopBGM() {
 	speaker.Clear()
 }
 
-// PlaySFX plays a short placeholder tone for a sound effect id.
+// PlaySFX plays a sound effect using decoded VAG data from a door file.
 func (a *AudioManager) PlaySFX(id int) {
-	freq := 600.0 + float64(id*15)
-	a.playTone(freq, 200*time.Millisecond)
+	doorPath := "data/Common/Door/DOOR00.DO2"
+	do2, err := fileio.LoadDO2File(doorPath)
+	if err != nil {
+		a.playTone(880, 200*time.Millisecond)
+		return
+	}
+	file, err := os.Open(doorPath)
+	if err != nil {
+		a.playTone(880, 200*time.Millisecond)
+		return
+	}
+	defer file.Close()
+	vabData, err := fileio.LoadVABDataStream(
+		io.NewSectionReader(file, do2.DO2FileFormat.VBOffset, do2.DO2FileFormat.VBLength),
+		do2.DO2FileFormat.VBLength,
+		do2.VABHeaderOutput,
+	)
+	if err != nil || len(vabData.RawADPCMData) < 2 {
+		a.playTone(880, 200*time.Millisecond)
+		return
+	}
+
+	pcm := DecodeVAG(vabData.RawADPCMData[1])
+	streamer := &pcmStreamer{samples: pcm}
+	buf := beep.NewBuffer(beep.Format{SampleRate: a.sampleRate, NumChannels: 1, Precision: 2})
+	buf.Append(streamer)
+	speaker.Play(buf.Streamer(0, buf.Len()))
 }
 
 // SFXNames maps sound effect ids observed in scripts to human-readable names.
