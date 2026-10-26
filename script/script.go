@@ -418,6 +418,10 @@ func (scriptDef *ScriptDef) ScriptSceBgmControl(lineData []byte, gameDef *game.G
 	binary.Read(byteArr, binary.LittleEndian, &instruction)
 
 	if gameDef != nil && gameDef.Audio != nil {
+		fmt.Printf("BGM control: id=%d op=%d type=%d volL=%d volR=%d\n",
+			instruction.Id, instruction.Operation, instruction.Type,
+			instruction.LeftVolume, instruction.RightVolume)
+
 		// Placeholder: map the script's BGM id to the audio manager.
 		// Full playback will use Operation/Type/LeftVolume/RightVolume.
 		if instruction.Operation == 1 {
