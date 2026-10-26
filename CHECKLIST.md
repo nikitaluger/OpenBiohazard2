@@ -28,6 +28,7 @@
 - [x] Implement one PLC opcode (motion/dest/neck)
 - [ ] Implement audio playback
 - [ ] Implement enemy AI / models
+- [ ] Implement puzzles
 - [x] Implement door models and transitions
 - [x] Implement inventory item use
 ## Notes
