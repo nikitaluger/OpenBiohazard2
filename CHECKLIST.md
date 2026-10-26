@@ -29,7 +29,7 @@
 - [ ] Implement audio playback
   - [x] Add audio manager placeholder
   - [x] Wire BGM control opcode
-  - [ ] Integrate audio library
+  - [x] Integrate audio library
   - [ ] Parse and play VAB/BGM data
 - [ ] Implement enemy AI / models
   - [x] Add enemy AI state scaffold
