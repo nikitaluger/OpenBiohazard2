@@ -22,8 +22,8 @@
 
 ## Next
 - [ ] Add hermetic tests for bitreader edge cases (mostly done)
-- [ ] Add valid-case TIM test
-- [ ] Add tests for EMD / MD1 / ESP
+- [x] Add valid-case TIM test
+- [x] Add tests for EMD / MD1 / ESP
 - [ ] Support multiple sprites in renderer
 - [ ] Implement one PLC opcode (motion/dest/neck)
 - [ ] Implement audio playback
