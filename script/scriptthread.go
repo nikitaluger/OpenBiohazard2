@@ -118,12 +118,19 @@ func (scriptThread *ScriptThread) JumpToNextLocationOnStack() {
 }
 
 func (scriptThread *ScriptThread) PushStack(newPosition int) {
-	scriptThread.LevelState[scriptThread.SubLevel].Stack[scriptThread.StackIndex] = newPosition
+	ls := scriptThread.LevelState[scriptThread.SubLevel]
+	if scriptThread.StackIndex < 0 {
+		scriptThread.StackIndex = 0
+	}
+	if scriptThread.StackIndex >= len(ls.Stack) {
+		ls.Stack = append(ls.Stack, make([]int, scriptThread.StackIndex+1-len(ls.Stack))...)
+	}
+	ls.Stack[scriptThread.StackIndex] = newPosition
 	scriptThread.StackIndex++
 }
 
 func (scriptThread *ScriptThread) PopStackTop() int {
-	if scriptThread.StackIndex == 0 {
+	if scriptThread.StackIndex <= 0 {
 		log.Fatal("Script stack is empty")
 	}
 
