@@ -108,6 +108,28 @@ type MD1Output struct {
 	NumBytes   int64
 }
 
+// validateMD1Offset ensures an offset is within the file and returns the
+// number of bytes remaining from that offset.
+func validateMD1Offset(offset int64, fileLength int64) (int64, error) {
+	if offset < 0 || offset >= fileLength {
+		return 0, fmt.Errorf("MD1 offset out of range: %d", offset)
+	}
+	return fileLength - offset, nil
+}
+
+// validateMD1Count ensures a slice allocation is both sane and fits in the
+// remaining bytes of the file.
+func validateMD1Count(count uint32, elemSize int, remaining int64) error {
+	const maxCount = 1 << 20 // generous but safe upper bound
+	if count > maxCount {
+		return fmt.Errorf("MD1 count too large: %d", count)
+	}
+	if int64(count)*int64(elemSize) > remaining {
+		return fmt.Errorf("MD1 count exceeds remaining file data: %d", count)
+	}
+	return nil
+}
+
 func LoadMD1Stream(r io.ReaderAt, fileLength int64) (*MD1Output, error) {
 	fileReader := io.NewSectionReader(r, int64(0), fileLength)
 	fileStreamReader := NewStreamReader(fileReader)
@@ -136,70 +158,129 @@ func LoadMD1Stream(r io.ReaderAt, fileLength int64) (*MD1Output, error) {
 	objects := make([]MD1Object, len(modelObjectHeaders))
 	for i := 0; i < len(modelObjectHeaders); i++ {
 		modelObjectHeader := modelObjectHeaders[i]
+
 		// Triangle data
-		offset := beginOffset + int64(modelObjectHeader.TrianglesHeader.VertexOffset)
-		fileStreamReader.SetPosition(offset)
+		triVertexOffset := beginOffset + int64(modelObjectHeader.TrianglesHeader.VertexOffset)
+		remaining, err := validateMD1Offset(triVertexOffset, fileLength)
+		if err != nil {
+			return nil, err
+		}
+		if err := validateMD1Count(modelObjectHeader.TrianglesHeader.VertexCount, 8, remaining); err != nil {
+			return nil, err
+		}
+		fileStreamReader.SetPosition(triVertexOffset)
 		triangleVertices := make([]MD1Vertex, modelObjectHeader.TrianglesHeader.VertexCount)
 		if err := fileStreamReader.ReadData(&triangleVertices); err != nil {
 			return nil, err
 		}
+		totalBytes = maxInt64(totalBytes, triVertexOffset+int64(modelObjectHeader.TrianglesHeader.VertexCount)*8)
 
-		offset = beginOffset + int64(modelObjectHeader.TrianglesHeader.NormalOffset)
-		fileStreamReader.SetPosition(offset)
+		triNormalOffset := beginOffset + int64(modelObjectHeader.TrianglesHeader.NormalOffset)
+		remaining, err = validateMD1Offset(triNormalOffset, fileLength)
+		if err != nil {
+			return nil, err
+		}
+		if err := validateMD1Count(modelObjectHeader.TrianglesHeader.NormalCount, 8, remaining); err != nil {
+			return nil, err
+		}
+		fileStreamReader.SetPosition(triNormalOffset)
 		triangleNormals := make([]MD1Vertex, modelObjectHeader.TrianglesHeader.NormalCount)
 		if err := fileStreamReader.ReadData(&triangleNormals); err != nil {
 			return nil, err
 		}
+		totalBytes = maxInt64(totalBytes, triNormalOffset+int64(modelObjectHeader.TrianglesHeader.NormalCount)*8)
 
-		offset = beginOffset + int64(modelObjectHeader.TrianglesHeader.TriangleIndexOffset)
-		fileStreamReader.SetPosition(offset)
+		triIndexOffset := beginOffset + int64(modelObjectHeader.TrianglesHeader.TriangleIndexOffset)
+		remaining, err = validateMD1Offset(triIndexOffset, fileLength)
+		if err != nil {
+			return nil, err
+		}
+		if err := validateMD1Count(modelObjectHeader.TrianglesHeader.TriangleIndexCount, 12, remaining); err != nil {
+			return nil, err
+		}
+		fileStreamReader.SetPosition(triIndexOffset)
 		triangleIndices := make([]MD1TriangleIndex, modelObjectHeader.TrianglesHeader.TriangleIndexCount)
 		if err := fileStreamReader.ReadData(&triangleIndices); err != nil {
 			return nil, err
 		}
+		totalBytes = maxInt64(totalBytes, triIndexOffset+int64(modelObjectHeader.TrianglesHeader.TriangleIndexCount)*12)
 
-		offset = beginOffset + int64(modelObjectHeader.TrianglesHeader.TextureOffset)
-		fileStreamReader.SetPosition(offset)
+		triTextureOffset := beginOffset + int64(modelObjectHeader.TrianglesHeader.TextureOffset)
+		remaining, err = validateMD1Offset(triTextureOffset, fileLength)
+		if err != nil {
+			return nil, err
+		}
+		if err := validateMD1Count(modelObjectHeader.TrianglesHeader.TriangleIndexCount, 12, remaining); err != nil {
+			return nil, err
+		}
+		fileStreamReader.SetPosition(triTextureOffset)
 		triangleTextures := make([]MD1TriangleTexture, modelObjectHeader.TrianglesHeader.TriangleIndexCount)
 		if err := fileStreamReader.ReadData(&triangleTextures); err != nil {
 			return nil, err
 		}
+		totalBytes = maxInt64(totalBytes, triTextureOffset+int64(modelObjectHeader.TrianglesHeader.TriangleIndexCount)*12)
 
 		// Quad data
-		offset = beginOffset + int64(modelObjectHeader.QuadsHeader.VertexOffset)
-		fileStreamReader.SetPosition(offset)
+		quadVertexOffset := beginOffset + int64(modelObjectHeader.QuadsHeader.VertexOffset)
+		remaining, err = validateMD1Offset(quadVertexOffset, fileLength)
+		if err != nil {
+			return nil, err
+		}
+		if err := validateMD1Count(modelObjectHeader.QuadsHeader.VertexCount, 8, remaining); err != nil {
+			return nil, err
+		}
+		fileStreamReader.SetPosition(quadVertexOffset)
 		quadVertices := make([]MD1Vertex, modelObjectHeader.QuadsHeader.VertexCount)
 		if err := fileStreamReader.ReadData(&quadVertices); err != nil {
 			return nil, err
 		}
+		totalBytes = maxInt64(totalBytes, quadVertexOffset+int64(modelObjectHeader.QuadsHeader.VertexCount)*8)
 
-		offset = beginOffset + int64(modelObjectHeader.QuadsHeader.NormalOffset)
-		fileStreamReader.SetPosition(offset)
+		quadNormalOffset := beginOffset + int64(modelObjectHeader.QuadsHeader.NormalOffset)
+		remaining, err = validateMD1Offset(quadNormalOffset, fileLength)
+		if err != nil {
+			return nil, err
+		}
+		if err := validateMD1Count(modelObjectHeader.QuadsHeader.NormalCount, 8, remaining); err != nil {
+			return nil, err
+		}
+		fileStreamReader.SetPosition(quadNormalOffset)
 		quadNormals := make([]MD1Vertex, modelObjectHeader.QuadsHeader.NormalCount)
 		if err := fileStreamReader.ReadData(&quadNormals); err != nil {
 			return nil, err
 		}
+		totalBytes = maxInt64(totalBytes, quadNormalOffset+int64(modelObjectHeader.QuadsHeader.NormalCount)*8)
 
 		// A quad has 2 triangles
-		offset = beginOffset + int64(modelObjectHeader.QuadsHeader.QuadIndexOffset)
-		fileStreamReader.SetPosition(offset)
+		quadIndexOffset := beginOffset + int64(modelObjectHeader.QuadsHeader.QuadIndexOffset)
+		remaining, err = validateMD1Offset(quadIndexOffset, fileLength)
+		if err != nil {
+			return nil, err
+		}
+		if err := validateMD1Count(modelObjectHeader.QuadsHeader.QuadIndexCount, 32, remaining); err != nil {
+			return nil, err
+		}
+		fileStreamReader.SetPosition(quadIndexOffset)
 		quadIndices := make([]MD1QuadIndex, modelObjectHeader.QuadsHeader.QuadIndexCount)
 		if err := fileStreamReader.ReadData(&quadIndices); err != nil {
 			return nil, err
 		}
+		totalBytes = maxInt64(totalBytes, quadIndexOffset+int64(modelObjectHeader.QuadsHeader.QuadIndexCount)*32)
 
-		offset = beginOffset + int64(modelObjectHeader.QuadsHeader.TextureOffset)
-		fileStreamReader.SetPosition(offset)
+		quadTextureOffset := beginOffset + int64(modelObjectHeader.QuadsHeader.TextureOffset)
+		remaining, err = validateMD1Offset(quadTextureOffset, fileLength)
+		if err != nil {
+			return nil, err
+		}
+		if err := validateMD1Count(modelObjectHeader.QuadsHeader.QuadIndexCount, 16, remaining); err != nil {
+			return nil, err
+		}
+		fileStreamReader.SetPosition(quadTextureOffset)
 		quadTextures := make([]MD1QuadTexture, modelObjectHeader.QuadsHeader.QuadIndexCount)
 		if err := fileStreamReader.ReadData(&quadTextures); err != nil {
 			return nil, err
 		}
-
-		// Assumes the texture offset is the largest offset
-		blockEnd := offset + (16 * int64(modelObjectHeader.QuadsHeader.QuadIndexCount))
-		if blockEnd > totalBytes {
-			totalBytes = blockEnd
-		}
+		totalBytes = maxInt64(totalBytes, quadTextureOffset+int64(modelObjectHeader.QuadsHeader.QuadIndexCount)*16)
 
 		objects[i] = MD1Object{
 			TriangleVertices: triangleVertices,
@@ -218,4 +299,11 @@ func LoadMD1Stream(r io.ReaderAt, fileLength int64) (*MD1Output, error) {
 		NumBytes:   totalBytes,
 	}
 	return md1Output, nil
+}
+
+func maxInt64(a, b int64) int64 {
+	if a > b {
+		return a
+	}
+	return b
 }
