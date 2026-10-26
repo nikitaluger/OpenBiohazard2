@@ -27,10 +27,20 @@
 - [x] Support multiple sprites in renderer
 - [x] Implement one PLC opcode (motion/dest/neck)
 - [ ] Implement audio playback
+  - [x] Add audio manager placeholder
+  - [x] Wire BGM control opcode
+  - [ ] Integrate audio library
+  - [ ] Parse and play VAB/BGM data
 - [ ] Implement enemy AI / models
-- [ ] Implement puzzles
+  - [x] Add enemy AI state scaffold
+  - [ ] Render enemy models
+  - [ ] Add basic enemy movement
 - [x] Implement door models and transitions
 - [x] Implement inventory item use
+- [ ] Implement puzzles
+  - [ ] Add puzzle trigger handling
+  - [ ] Implement puzzle state logic
+
 ## Notes
 - Tests added so far are mostly scaffolding (error paths and crash guards).
 - They do not yet verify full parsing correctness or game behavior.
