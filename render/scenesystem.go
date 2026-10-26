@@ -50,6 +50,7 @@ func (ss *SceneSystem) RenderItems(renderDef *RenderDef) {
 
 func (ss *SceneSystem) RenderEnemies(renderDef *RenderDef, timeElapsedSeconds float64) {
 	for _, enemyEntity := range ss.EnemyGroupEntity.EnemyEntities {
+		enemyEntity.Update(timeElapsedSeconds)
 		RenderEnemyEntity(renderDef, *enemyEntity, timeElapsedSeconds)
 	}
 }

@@ -14,6 +14,9 @@ type EnemyEntity struct {
 	RotationY    float32
 	EMDOutput    *fileio.EMDOutput
 	DebugEntity  *DebugEntity
+
+	// Basic AI state scaffold.
+	AIState int
 }
 
 func NewEnemyEntity(emdOutput *fileio.EMDOutput) *EnemyEntity {
@@ -37,6 +40,17 @@ func (enemy *EnemyEntity) SetEnemyData(instruction fileio.ScriptInstrSceEmSet) {
 	enemy.DebugEntity = NewEnemyDebugEntity(enemy.Position, enemy.RotationY)
 }
 
+const (
+	ENEMY_STATE_IDLE = 0
+	ENEMY_STATE_CHASE = 1
+)
+
+func (enemy *EnemyEntity) Update(timeElapsedSeconds float64) {
+	// Scaffold for future enemy AI. No movement yet.
+	if enemy.AIState == 0 {
+		enemy.AIState = ENEMY_STATE_IDLE
+	}
+}
 func (enemy *EnemyEntity) GetModelMatrix() mgl32.Mat4 {
 	modelMatrix := mgl32.Ident4()
 	modelMatrix = modelMatrix.Mul4(mgl32.Translate3D(enemy.Position.X(), enemy.Position.Y(), enemy.Position.Z()))
