@@ -105,6 +105,7 @@ func (a *AudioManager) PlaySFX(id int) {
 var SFXNames = map[int]string{
 	0x0A: "Unknown SFX 0x0A",
 	0x0B: "Unknown SFX 0x0B",
+	0x0C: "Unknown SFX 0x0C",
 	0x21: "Unknown SFX 0x21",
 }
 
