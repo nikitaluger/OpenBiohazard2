@@ -21,11 +21,11 @@
 - [x] Enable sprite rendering
 
 ## Next
-- [ ] Add hermetic tests for bitreader edge cases (mostly done)
+- [x] Add hermetic tests for bitreader edge cases (mostly done)
 - [x] Add valid-case TIM test
 - [x] Add tests for EMD / MD1 / ESP
-- [ ] Support multiple sprites in renderer
-- [ ] Implement one PLC opcode (motion/dest/neck)
+- [x] Support multiple sprites in renderer
+- [x] Implement one PLC opcode (motion/dest/neck)
 - [ ] Implement audio playback
 - [ ] Implement enemy AI / models
 - [ ] Implement door models and transitions
