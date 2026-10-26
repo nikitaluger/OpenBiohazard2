@@ -5,16 +5,19 @@ import (
 	"encoding/binary"
 
 	"github.com/OpenBiohazard2/OpenBiohazard2/fileio"
+	"github.com/OpenBiohazard2/OpenBiohazard2/game"
 )
 
 // PLC commands are used for 3D model animation
 
-func (scriptDef *ScriptDef) ScriptPlcMotion(lineData []byte) int {
+func (scriptDef *ScriptDef) ScriptPlcMotion(lineData []byte, gameDef *game.GameDef) int {
 	byteArr := bytes.NewBuffer(lineData)
 	instruction := fileio.ScriptInstrPlcMotion{}
 	binary.Read(byteArr, binary.LittleEndian, &instruction)
 
-	// TODO: implement
+	if gameDef != nil && gameDef.Player != nil {
+		gameDef.Player.Motion = int(instruction.MoveNumber)
+	}
 
 	return 1
 }

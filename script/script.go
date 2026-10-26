@@ -232,7 +232,7 @@ func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 	case fileio.OP_MEMBER_CMP:
 		returnValue = scriptDef.ScriptMemberCompare(lineData)
 	case fileio.OP_PLC_MOTION: // 0x3f
-		returnValue = scriptDef.ScriptPlcMotion(lineData)
+		returnValue = scriptDef.ScriptPlcMotion(lineData, gameDef)
 	case fileio.OP_PLC_DEST: // 0x40
 		returnValue = scriptDef.ScriptPlcDest(lineData)
 	case fileio.OP_PLC_NECK: // 0x41

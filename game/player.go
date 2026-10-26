@@ -26,6 +26,7 @@ type Player struct {
 	Position      mgl32.Vec3
 	RotationAngle float32
 	PoseNumber    int
+	Motion        int
 }
 
 // Position is in world space
