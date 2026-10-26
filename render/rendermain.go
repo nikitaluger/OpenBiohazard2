@@ -92,7 +92,7 @@ func (r *RenderDef) RenderFrame(playerEntity PlayerEntity,
 
 	r.SceneSystem.RenderEnemies(r, timeElapsedSeconds)
 
-	// RenderSprites(r, r.SpriteGroupEntity, timeElapsedSeconds)
+	RenderSprites(r, r.SceneSystem.SpriteGroupEntity, timeElapsedSeconds)
 
 	// Only render for debugging
 	RenderCameraSwitches(r, debugEntities.CameraSwitchDebugEntity)
