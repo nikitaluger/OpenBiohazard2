@@ -11,13 +11,40 @@ import (
 // AudioManager wraps basic audio playback using beep.
 type AudioManager struct {
 	sampleRate beep.SampleRate
+
+	// Volume levels observed from BGM control commands.
+	mainVolume  float64
+	prog0Volume float64
+	prog1Volume float64
+	prog2Volume float64
 }
 
 // NewAudioManager initializes the audio system.
 func NewAudioManager() *AudioManager {
 	sr := beep.SampleRate(44100)
 	_ = speaker.Init(sr, 1024)
-	return &AudioManager{sampleRate: sr}
+	return &AudioManager{
+		sampleRate:  sr,
+		mainVolume:  1.0,
+		prog0Volume: 1.0,
+		prog1Volume: 1.0,
+		prog2Volume: 1.0,
+	}
+}
+
+// SetVolume stores a volume level for a BGM volume target.
+func (a *AudioManager) SetVolume(target uint8, left, right uint8) {
+	level := (float64(left) + float64(right)) / 2.0 / 127.0
+	switch target {
+	case 0:
+		a.mainVolume = level
+	case 1:
+		a.prog0Volume = level
+	case 2:
+		a.prog1Volume = level
+	case 3:
+		a.prog2Volume = level
+	}
 }
 
 // BGMNames maps BGM ids observed in scripts to human-readable names.

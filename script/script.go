@@ -430,6 +430,8 @@ func (scriptDef *ScriptDef) ScriptSceBgmControl(lineData []byte, gameDef *game.G
 			gameDef.Audio.PlayBGM(int(instruction.Id))
 		} else if instruction.Operation == 2 {
 			gameDef.Audio.StopBGM()
+		} else if instruction.Operation == 0 {
+			gameDef.Audio.SetVolume(instruction.Type, instruction.LeftVolume, instruction.RightVolume)
 		}
 	}
 
