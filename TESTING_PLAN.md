@@ -26,9 +26,17 @@ out, err := LoadSomeStream(r, int64(len(data)))
 - Avoid global state and shared temp files.
 - Run `go test ./...` before committing.
 
+## Current Status
+- [x] Add hermetic PLD stream error tests
+- [ ] Add streamreader hermetic tests
+- [ ] Add bitreader hermetic tests
+- [ ] Add hermetic TIM tests
+- [ ] Enable sprite rendering
+- [ ] Implement one missing script opcode
+
 ## Suggested Order
 1. streamreader
 2. bitreader
 3. TIM
-4. PLD
+4. PLD (expand valid-case coverage)
 5. EMD / MD1 / ESP
