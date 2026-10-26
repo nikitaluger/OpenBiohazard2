@@ -246,7 +246,7 @@ func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 	case fileio.OP_ITEM_AOT_SET: // 0x4e
 		returnValue = scriptDef.ScriptItemAotSet(lineData, gameDef)
 	case fileio.OP_SCE_BGM_CONTROL: // 0x51
-		returnValue = scriptDef.ScriptSceBgmControl(lineData)
+		returnValue = scriptDef.ScriptSceBgmControl(lineData, gameDef)
 	case fileio.OP_AOT_SET_4P:
 		returnValue = scriptDef.ScriptAotSet4p(lineData, gameDef)
 	case fileio.OP_DOOR_AOT_SET_4P:
@@ -412,10 +412,20 @@ func (scriptDef *ScriptDef) ScriptSceEmSet(lineData []byte, renderDef *render.Re
 	return 1
 }
 
-func (scriptDef *ScriptDef) ScriptSceBgmControl(lineData []byte) int {
+func (scriptDef *ScriptDef) ScriptSceBgmControl(lineData []byte, gameDef *game.GameDef) int {
 	byteArr := bytes.NewBuffer(lineData)
 	instruction := fileio.ScriptInstrSceBgmControl{}
 	binary.Read(byteArr, binary.LittleEndian, &instruction)
+
+	if gameDef != nil && gameDef.Audio != nil {
+		// Placeholder: map the script's BGM id to the audio manager.
+		// Full playback will use Operation/Type/LeftVolume/RightVolume.
+		if instruction.Operation == 1 {
+			gameDef.Audio.PlayBGM(int(instruction.Id))
+		} else if instruction.Operation == 2 {
+			gameDef.Audio.StopBGM()
+		}
+	}
 
 	return 1
 }

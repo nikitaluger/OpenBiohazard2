@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 
+	"github.com/OpenBiohazard2/OpenBiohazard2/audio"
 	"github.com/OpenBiohazard2/OpenBiohazard2/world"
 	"github.com/go-gl/mathgl/mgl32"
 )
@@ -27,6 +28,7 @@ type GameDef struct {
 	RoomScript  RoomScript
 	GameWorld   *world.GameWorld
 	Player      *Player
+	Audio       *audio.AudioManager
 }
 
 func NewGame(stageId int, roomId int, cameraId int) *GameDef {
@@ -36,6 +38,7 @@ func NewGame(stageId int, roomId int, cameraId int) *GameDef {
 		CameraId:    cameraId,
 		StateStatus: GAME_LOAD_ROOM,
 		GameWorld:   world.NewGameWorld(),
+		Audio:       audio.NewAudioManager(),
 	}
 }
 
