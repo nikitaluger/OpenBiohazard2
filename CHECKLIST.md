@@ -28,7 +28,7 @@
 - [x] Implement one PLC opcode (motion/dest/neck)
 - [ ] Implement audio playback
 - [ ] Implement enemy AI / models
-- [ ] Implement door models and transitions
+- [x] Implement door models and transitions
 - [x] Implement inventory item use
 ## Notes
 - Tests added so far are mostly scaffolding (error paths and crash guards).
