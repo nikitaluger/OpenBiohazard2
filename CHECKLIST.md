@@ -37,7 +37,7 @@
   - [ ] Map BGM/SFX IDs to tracks
   - [ ] Parse VAB data
   - [ ] Looping and volume control
-  - [ ] SFX triggers
+  - [ ] SFX triggers (real door sound placeholder)
 - [ ] Implement enemy AI / models
   - [x] Add enemy AI state scaffold
   - [ ] Render enemy models
