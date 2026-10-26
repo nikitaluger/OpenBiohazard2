@@ -19,8 +19,9 @@ type SpriteGroupEntity struct {
 	VertexArrayObject     uint32
 	VertexBufferObject    uint32
 
-	// Per-sprite vertex counts, in the same order as TextureIdPool.
-	SpriteVertexCounts []int
+	// Per-sprite vertex counts and texture indices, in append order.
+	SpriteVertexCounts  []int
+	SpriteTextureIndices []int
 
 	// Animation state for the currently displayed sprite frame.
 	totalRuntime float64
@@ -52,6 +53,7 @@ func NewSpriteGroupEntity(spriteData []fileio.SpriteData) *SpriteGroupEntity {
 		VertexArrayObject:     vao,
 		VertexBufferObject:    vbo,
 		SpriteVertexCounts:    make([]int, 0),
+		SpriteTextureIndices:  make([]int, 0),
 	}
 }
 
@@ -122,8 +124,20 @@ func (renderDef *RenderDef) AddSprite(sprite fileio.ScriptInstrSceEsprOn) {
 
 	// Generate billboard sprite using geometry package
 	rect := geometry.NewBillboardSprite(spriteCenter, spriteWidth, viewMatrix)
-	renderDef.SceneSystem.SpriteGroupEntity.VertexBuffer = append(renderDef.SceneSystem.SpriteGroupEntity.VertexBuffer, rect.VertexBuffer...)
-	renderDef.SceneSystem.SpriteGroupEntity.SpriteVertexCounts = append(renderDef.SceneSystem.SpriteGroupEntity.SpriteVertexCounts, len(rect.VertexBuffer))
+
+	group := renderDef.SceneSystem.SpriteGroupEntity
+	if group == nil {
+		return
+	}
+
+	textureIndex, ok := group.SpriteTextureIndexMap[int(sprite.Id)]
+	if !ok {
+		return
+	}
+
+	group.VertexBuffer = append(group.VertexBuffer, rect.VertexBuffer...)
+	group.SpriteVertexCounts = append(group.SpriteVertexCounts, len(rect.VertexBuffer))
+	group.SpriteTextureIndices = append(group.SpriteTextureIndices, textureIndex)
 }
 
 // advanceSpriteFrame computes the next animation-time accumulator and frame index.
@@ -140,6 +154,9 @@ func advanceSpriteFrame(totalRuntime float64, curFrame int, numFrames int, timeE
 }
 
 func RenderSprites(r *RenderDef, spriteGroupEntity *SpriteGroupEntity, timeElapsedSeconds float64) {
+	if r == nil || r.Renderer == nil || spriteGroupEntity == nil {
+		return
+	}
 	vertexBuffer := spriteGroupEntity.VertexBuffer
 	if len(vertexBuffer) == 0 {
 		return
@@ -149,7 +166,6 @@ func RenderSprites(r *RenderDef, spriteGroupEntity *SpriteGroupEntity, timeElaps
 		return
 	}
 
-	// Keep a single animation timer, but render every sprite that has geometry.
 	spriteGroupEntity.totalRuntime += timeElapsedSeconds
 
 	vertexOffset := 0
@@ -158,7 +174,21 @@ func RenderSprites(r *RenderDef, spriteGroupEntity *SpriteGroupEntity, timeElaps
 		if i < len(spriteGroupEntity.SpriteVertexCounts) {
 			count = spriteGroupEntity.SpriteVertexCounts[i]
 		}
-		if count == 0 || len(textureIds[i]) == 0 {
+		if count == 0 {
+			continue
+		}
+		if vertexOffset+count > len(vertexBuffer) {
+			break
+		}
+
+		textureIndex := i
+		if i < len(spriteGroupEntity.SpriteTextureIndices) {
+			textureIndex = spriteGroupEntity.SpriteTextureIndices[i]
+		}
+		if textureIndex < 0 || textureIndex >= len(textureIds) {
+			textureIndex = 0
+		}
+		if len(textureIds[textureIndex]) == 0 {
 			vertexOffset += count
 			continue
 		}
@@ -166,13 +196,13 @@ func RenderSprites(r *RenderDef, spriteGroupEntity *SpriteGroupEntity, timeElaps
 		if spriteGroupEntity.totalRuntime > SPRITE_FRAME_TIME {
 			spriteGroupEntity.totalRuntime = 0
 			spriteGroupEntity.curFrame++
-			if spriteGroupEntity.curFrame >= len(textureIds[i]) {
+			if spriteGroupEntity.curFrame >= len(textureIds[textureIndex]) {
 				spriteGroupEntity.curFrame = 0
 			}
 		}
 
 		frame := spriteGroupEntity.curFrame
-		if frame >= len(textureIds[i]) {
+		if frame >= len(textureIds[textureIndex]) {
 			frame = 0
 		}
 
@@ -180,7 +210,7 @@ func RenderSprites(r *RenderDef, spriteGroupEntity *SpriteGroupEntity, timeElaps
 			spriteGroupEntity.VertexArrayObject,
 			spriteGroupEntity.VertexBufferObject,
 			vertexBuffer[vertexOffset:vertexOffset+count],
-			textureIds[i][frame],
+			textureIds[textureIndex][frame],
 			nil,
 			RENDER_TYPE_SPRITE,
 		)
