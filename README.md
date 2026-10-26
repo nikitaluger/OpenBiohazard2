@@ -36,19 +36,25 @@ Windows is case-insensitive, but folder names still need to match the expected n
 - [ ] Audio
   - [ ] Background music
   - [ ] Core sound
+  - (Audio file formats are parsed; playback is not implemented yet.)
 - [ ] Game
   - [x] Collision detection
   - [x] Event triggers
-  - [ ] Inventory system
-  - [ ] Enemy AI
+  - [ ] Inventory system (UI/menu rendering implemented; item use and management pending)
+  - [ ] Enemy AI (enemies spawn and render as debug placeholders; no AI or full models yet)
   - [ ] Puzzles
-  - [ ] Door transitions
+  - [ ] Door transitions (room switching works; door models and animations pending)
 - [ ] Renderer
   - [x] Animation
   - [x] Pre-rendered background
   - [x] Depth testing
-  - [ ] Sprites
+  - [ ] Sprites (assets are parsed; rendering is not enabled yet)
   - [ ] Shadows
+- [ ] Scripting engine
+  - [x] Control flow (if/else, loops, switch, goto/gosub)
+  - [x] Camera changes
+  - [x] AOT triggers, items, and doors
+  - [ ] Full opcode coverage (44 of 103 opcodes implemented)
 
 ### Controls
 
