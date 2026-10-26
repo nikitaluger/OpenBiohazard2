@@ -30,6 +30,7 @@
   - [x] Add audio manager placeholder
   - [x] Wire BGM control opcode
   - [x] Integrate audio library
+  - [x] Decode VAG ADPCM (verified)
   - [ ] Map BGM/SFX IDs to tracks
   - [ ] Parse VAB data
   - [ ] Looping and volume control
