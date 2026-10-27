@@ -61,6 +61,7 @@ func (gameDef *GameDef) HandleRoomSwitch(position mgl32.Vec3) {
 	door := gameDef.GameWorld.AotManager.GetDoorNearPlayer(position)
 	if door != nil {
 		// Switch to a new room
+		fmt.Printf("Door transition: to stage=%d room=%d camera=%d\n", 1+int(door.Stage), int(door.Room), int(door.Camera))
 		gameDef.StageId = 1 + int(door.Stage)
 		gameDef.RoomId = int(door.Room)
 		gameDef.CameraId = int(door.Camera)
