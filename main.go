@@ -59,6 +59,9 @@ func initializeGame() (*render.RenderDef, *game.GameDef, *state.GameStateManager
 
 	gameStateManager := state.NewGameStateManager()
 
+	// Brighten the scene to help verify textures
+	renderDef.EnvironmentLight = [3]float32{1.0, 1.0, 1.0}
+
 	return renderDef, gameDef, gameStateManager
 }
 
