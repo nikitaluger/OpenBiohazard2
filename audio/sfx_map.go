@@ -108,4 +108,5 @@ var SFXFileNames = map[string]string{
 	"WEAPON01": "Knife hitting a wall",
 	"WEAPON02": "Handgun shot",
 	"WEAPON03": "Handgun shot",
+	"WEAPON04": "Handgun shot",
 }
