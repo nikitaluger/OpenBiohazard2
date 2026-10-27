@@ -97,4 +97,5 @@ var SFXFileNames = map[string]string{
 	"ENEMY72": "Unknown",
 	"ENEMY98": "Zombie footstep",
 	"MAIN0C": "save room BGM",
+	"MAIN00_1": "Burning sound BGM",
 }
