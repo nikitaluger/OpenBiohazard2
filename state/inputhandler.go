@@ -59,6 +59,7 @@ func (h *InputHandler) HandleInventoryToggle() {
 }
 
 var collisionTogglePrev bool
+var roomWarpPrev bool
 
 func (h *InputHandler) HandleAllInput(gameDef *game.GameDef, timeElapsedSeconds float64, gameWorld *world.GameWorld) {
 	collisionEntities := gameWorld.GameRoom.CollisionEntities
@@ -69,6 +70,15 @@ func (h *InputHandler) HandleAllInput(gameDef *game.GameDef, timeElapsedSeconds 
 		fmt.Printf("NoClip toggled: %v\n", world.DebugNoClip)
 	}
 	collisionTogglePrev = cur
+
+	curR := h.windowHandler.InputHandler.IsKeyRPressed()
+	if curR && !roomWarpPrev {
+		gameDef.StageId = 1
+		gameDef.RoomId = 3
+		gameDef.StateStatus = game.GAME_LOAD_ROOM
+		fmt.Println("Warp to ROOM1030")
+	}
+	roomWarpPrev = curR
 
 	h.HandleTankMovement(gameDef, timeElapsedSeconds, collisionEntities)
 	h.HandleTankRotation(gameDef, timeElapsedSeconds)

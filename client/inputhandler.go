@@ -118,3 +118,7 @@ func (handler *InputHandler) mouseCallback(window *glfw.Window, xPos float64, yP
 func (h *InputHandler) IsKeyCPressed() bool {
 	return h.keysPressed[glfw.KeyC]
 }
+// IsKeyRPressed reports whether the R key is currently held.
+func (h *InputHandler) IsKeyRPressed() bool {
+	return h.keysPressed[glfw.KeyR]
+}
