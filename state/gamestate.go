@@ -196,6 +196,10 @@ func updateRoomBackroundImage(mainGameRender *MainGameRender, gameDef *game.Game
 		return
 	}
 
+	if roomOutput == nil {
+		return
+	}
+
 	if roomOutput.BackgroundImage != nil {
 		renderDef := mainGameRender.RenderDef
 		render.UpdateTextureADT(renderDef.SceneSystem.BackgroundImageEntity.TextureId, roomOutput.BackgroundImage)
