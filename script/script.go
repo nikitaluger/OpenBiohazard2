@@ -206,9 +206,9 @@ func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 	case fileio.OP_NO_OP:
 		returnValue = 1
 	case fileio.OP_WSLEEP: // 0x0b
-		returnValue = scriptDef.ScriptSleep(curScriptThread, lineData)
+		returnValue = 1 // not implemented
 	case fileio.OP_WSLEEPING: // 0x0c
-		returnValue = scriptDef.ScriptSleeping(curScriptThread, lineData)
+		returnValue = 1 // not implemented
 	case fileio.OP_CHECK: // 0x21
 		returnValue = scriptDef.ScriptCheckBit(lineData)
 	case fileio.OP_SET_BIT: // 0x22
