@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"log"
 
 	"github.com/OpenBiohazard2/OpenBiohazard2/fileio"
 )
@@ -35,6 +36,11 @@ func (scriptDef *ScriptDef) ScriptEvtExec(lineData []byte, scriptData fileio.Scr
 	binary.Read(byteArr, binary.LittleEndian, &instruction)
 
 	nextThreadNum := 0
+
+	if int(instruction.Event) < 0 || int(instruction.Event) >= len(scriptData.StartProgramCounter) {
+		log.Printf("Warning: invalid event number %d (max %d)", instruction.Event, len(scriptData.StartProgramCounter)-1)
+		return INSTRUCTION_NORMAL
+	}
 
 	if int(instruction.ThreadNum) >= 0 && int(instruction.ThreadNum) < len(scriptDef.ScriptThreads) {
 		// thread num is defined
