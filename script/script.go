@@ -260,6 +260,7 @@ func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 	case fileio.OP_ITEM_AOT_SET_4P:
 		returnValue = scriptDef.ScriptItemAotSet4p(lineData, gameDef)
 	default:
+		fmt.Printf("Unhandled opcode: 0x%02x at PC=%d\n", opcode, curScriptThread.ProgramCounter)
 		returnValue = 1
 	}
 
