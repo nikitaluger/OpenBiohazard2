@@ -10,4 +10,9 @@ var SFXFileNames = map[string]string{
 	"CORE13": "character damage voice 5",
 	"CORE14": "character damage voice 6",
 	"CORE15": "character damage voice 7",
+	"CORE16": "Biohazard 2 (JP) main menu new/load game voice",
+	"CORE17": "Resident Evil 2 (EN) main menu new/load game voice",
+	"CORE18": "4th survivor (Hunk) game start audio",
+	"CORE19": "4th survivor (Tofu) game start audio",
+	"CORE20": "Extreme Battle Mode game start audio",
 }
