@@ -15,4 +15,13 @@ var SFXFileNames = map[string]string{
 	"CORE18": "4th survivor (Hunk) game start audio",
 	"CORE19": "4th survivor (Tofu) game start audio",
 	"CORE20": "Extreme Battle Mode game start audio",
+	"CORE21": "Unknown",
+	"CORE22": "Main menu up/down sound effect",
+	"CORE32": "character death scream 1",
+	"CORE33": "character death scream 2",
+	"CORE34": "character death scream 3",
+	"CORE35": "character death scream 4",
+	"CORE36": "character death scream 5",
+	"CORE37": "character death scream 6",
+	"CORE38": "character death scream 7",
 }
