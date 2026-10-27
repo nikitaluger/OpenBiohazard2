@@ -226,7 +226,7 @@ func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 	case fileio.OP_WORK_SET:
 		returnValue = scriptDef.ScriptWorkSet(curScriptThread, lineData)
 	case fileio.OP_POS_SET:
-		returnValue = scriptDef.ScriptPositionSet(curScriptThread, lineData, gameDef)
+		returnValue = scriptDef.ScriptPositionSet(curScriptThread, lineData, gameDef, renderDef)
 	case fileio.OP_MEMBER_SET:
 		returnValue = scriptDef.ScriptMemberSet(curScriptThread, lineData, gameDef, renderDef)
 	case fileio.OP_SCA_ID_SET:
@@ -329,15 +329,21 @@ func (scriptDef *ScriptDef) ScriptWorkSet(thread *ScriptThread, lineData []byte)
 	return 1
 }
 
-func (scriptDef *ScriptDef) ScriptPositionSet(thread *ScriptThread, lineData []byte, gameDef *game.GameDef) int {
+func (scriptDef *ScriptDef) ScriptPositionSet(thread *ScriptThread, lineData []byte, gameDef *game.GameDef, renderDef *render.RenderDef) int {
 	byteArr := bytes.NewBuffer(lineData)
 	instruction := fileio.ScriptInstrPosSet{}
 	binary.Read(byteArr, binary.LittleEndian, &instruction)
 
 	if thread.WorkSetComponent == WORKSET_PLAYER {
 		gameDef.Player.Position = mgl32.Vec3{float32(instruction.X), float32(instruction.Y), float32(instruction.Z)}
+	} else if thread.WorkSetComponent == WORKSET_OBJECT {
+		index := thread.WorkSetIndex
+		if renderDef != nil && index >= 0 && index < len(renderDef.SceneSystem.ItemGroupEntity.ModelObjectData) {
+			renderDef.SceneSystem.ItemGroupEntity.ModelObjectData[index].ModelPosition =
+				mgl32.Vec3{float32(instruction.X), float32(instruction.Y), float32(instruction.Z)}
+		}
 	} else {
-		// TODO: set position of object
+		// TODO: set position of other worksets
 	}
 
 	return 1
@@ -360,9 +366,11 @@ func (scriptDef *ScriptDef) ScriptMemberSet(thread *ScriptThread, lineData []byt
 		case 15:
 			// convert to angle in degrees
 			modelObject.RotationAngle = (float32(instruction.Value) / 4096.0) * 360.0
+		default:
+			// Other object attributes are not implemented yet.
 		}
 	} else {
-		// TODO: set attribute of object
+		// Other worksets are not implemented yet.
 	}
 	return 1
 }
