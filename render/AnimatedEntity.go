@@ -1,6 +1,8 @@
 package render
 
 import (
+	"fmt"
+
 	"github.com/OpenBiohazard2/OpenBiohazard2/fileio"
 	"github.com/OpenBiohazard2/OpenBiohazard2/game"
 	"github.com/OpenBiohazard2/OpenBiohazard2/geometry"
@@ -46,6 +48,7 @@ func NewPlayerEntity(pldOutput *fileio.PLDOutput) *PlayerEntity {
 	gl.GenBuffers(1, &vbo)
 
 	textureId := NewTextureTIM(pldOutput.TextureData)
+	fmt.Printf("Player texture: id=%d size=%dx%d\n", textureId, pldOutput.TextureData.ImageWidth, pldOutput.TextureData.ImageHeight)
 	vertexBuffer := geometry.NewMD1Geometry(pldOutput.MeshData, pldOutput.TextureData)
 
 	// Pre-allocate arrays based on mesh data
