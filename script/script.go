@@ -267,6 +267,48 @@ func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 		returnValue = scriptDef.ScriptDoorAotSet4p(lineData, gameDef)
 	case fileio.OP_ITEM_AOT_SET_4P:
 		returnValue = scriptDef.ScriptItemAotSet4p(lineData, gameDef)
+	case fileio.OP_DO_START: // 0x11
+		returnValue = 1 // not implemented
+	case fileio.OP_DO_END: // 0x12
+		returnValue = 1 // not implemented
+	case fileio.OP_WORK_COPY: // 0x1d
+		returnValue = 1 // not implemented
+	case fileio.OP_MESSAGE_ON: // 0x2b
+		returnValue = 1 // not implemented
+	case fileio.OP_MEMBER_SET2: // 0x35
+		returnValue = 1 // not implemented
+	case fileio.OP_DIR_CK: // 0x39
+		returnValue = 1 // not implemented
+	case fileio.OP_CUT_AUTO: // 0x3c
+		returnValue = 1 // not implemented
+	case fileio.OP_MEMBER_COPY: // 0x3d
+		returnValue = 1 // not implemented
+	case fileio.OP_PLC_RET: // 0x42
+		returnValue = 1 // not implemented
+	case fileio.OP_CUT_REPLACE: // 0x4b
+		returnValue = 1 // not implemented
+	case fileio.OP_SCE_BGMTBL_SET: // 0x57
+		returnValue = 1 // not implemented
+	case fileio.OP_PLC_ROT: // 0x58
+		returnValue = 1 // not implemented
+	case fileio.OP_XA_ON: // 0x59
+		returnValue = 1 // not implemented
+	case fileio.OP_PLC_CNT: // 0x5b
+		returnValue = 1 // not implemented
+	case fileio.OP_XA_VOL: // 0x5f
+		returnValue = 1 // not implemented
+	case fileio.OP_PLC_STOP: // 0x66
+		returnValue = 1 // not implemented
+	case fileio.OP_LIGHT_KIDO_SET: // 0x6b
+		returnValue = 1 // not implemented
+	case fileio.OP_SCE_PARTS_BOMB: // 0x7a
+		returnValue = 1 // not implemented
+	case fileio.OP_SCE_PARTS_DOWN: // 0x7b
+		returnValue = 1 // not implemented
+	case fileio.OP_EVT_NEXT: // 0x02
+		returnValue = 1 // not implemented
+	case fileio.OP_EVT_KILL: // 0x05
+		returnValue = 1 // not implemented
 	default:
 		fmt.Printf("Unhandled opcode: 0x%02x at PC=%d\n", opcode, curScriptThread.ProgramCounter)
 		returnValue = 1
