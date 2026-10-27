@@ -126,9 +126,14 @@ func (scriptDef *ScriptDef) RunScriptUntilBreakControlFlow(
 	for true {
 		lineData := scriptData.Instructions[curScriptThread.ProgramCounter]
 		if len(lineData) == 0 {
-			curScriptThread.RunStatus = false
-			log.Print("Warning: terminate script thread at program counter ", curScriptThread.ProgramCounter)
-			break
+			if curScriptThread.ProgramCounter >= len(scriptData.Instructions)-1 {
+				curScriptThread.RunStatus = false
+				log.Print("Warning: terminate script thread at program counter ", curScriptThread.ProgramCounter)
+				break
+			}
+			curScriptThread.ProgramCounter++
+			curScriptThread.OverrideProgramCounter = true
+			continue
 		}
 
 		opcode := lineData[0]
