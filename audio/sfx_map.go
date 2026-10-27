@@ -26,4 +26,7 @@ var SFXFileNames = map[string]string{
 	"CORE37": "character death scream 6",
 	"CORE38": "character death scream 7",
 	"DOOR99": "typewriter key press sound",
+	"ENEMY00": "zombie footstep sound 1",
+	"ENEMY01": "zombie footstep sound 2",
+	"ENEMY02": "zombie footstep sound 3",
 }
