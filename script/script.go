@@ -157,6 +157,8 @@ func (scriptDef *ScriptDef) RunScriptUntilBreakControlFlow(
 	return scriptReturnValue
 }
 
+var seenUnhandled = make(map[byte]bool)
+
 func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 	threadNum int,
 	curScriptThread *ScriptThread,
@@ -310,7 +312,10 @@ func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 	case fileio.OP_EVT_KILL: // 0x05
 		returnValue = 1 // not implemented
 	default:
-		fmt.Printf("Unhandled opcode: 0x%02x at PC=%d\n", opcode, curScriptThread.ProgramCounter)
+		if !seenUnhandled[opcode] {
+			seenUnhandled[opcode] = true
+			fmt.Printf("Unhandled opcode: 0x%02x at PC=%d\n", opcode, curScriptThread.ProgramCounter)
+		}
 		returnValue = 1
 	}
 
