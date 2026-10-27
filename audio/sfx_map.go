@@ -29,4 +29,6 @@ var SFXFileNames = map[string]string{
 	"ENEMY00": "zombie footstep sound 1",
 	"ENEMY01": "zombie footstep sound 2",
 	"ENEMY02": "zombie footstep sound 3",
+	"ENEMY03": "sound when moving on water",
+	"ENEMY04": "zombie dog footstep (approx)",
 }
