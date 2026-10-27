@@ -91,7 +91,7 @@ func (a *AudioManager) PlayBGM(id int) {
 		return
 	}
 
-	streamer := &pcmStreamer{samples: wave.Samples, channels: wave.Channels}
+	streamer := newPCMStreamer(wave.Samples, wave.Channels)
 	buf := beep.NewBuffer(beep.Format{
 		SampleRate:  beep.SampleRate(wave.SamplesPerSec),
 		NumChannels: wave.Channels,
@@ -134,7 +134,7 @@ func (a *AudioManager) PlaySFX(id int) {
 	}
 
 	pcm := DecodeVAG(vabData.RawADPCMData[1])
-	streamer := &pcmStreamer{samples: pcm, channels: 1}
+	streamer := newPCMStreamer(pcm, 1)
 	buf := beep.NewBuffer(beep.Format{SampleRate: a.sampleRate, NumChannels: 1, Precision: 2})
 	buf.Append(streamer)
 	speaker.Play(buf.Streamer(0, buf.Len()))
