@@ -28,7 +28,7 @@
 - [x] Door transition (ROOM1000 -> ROOM1010)
 - [x] Audio (BGM plays)
 - [ ] Enemy placeholder (if present)
-- [ ] Item pickup (if present)
+- [ ] Scripted Kendo scene (zombies break glass, Kendo dies)
 - [x] Add hermetic tests for bitreader edge cases (mostly done)
 - [x] Add valid-case TIM test
 - [x] Add tests for EMD / MD1 / ESP
