@@ -203,8 +203,10 @@ func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 		returnValue = scriptDef.ScriptGoSub(curScriptThread, lineData, scriptData)
 	case fileio.OP_BREAK:
 		returnValue = scriptDef.ScriptBreak(curScriptThread, lineData)
-	case fileio.OP_CHECK: // 0x21
-		returnValue = scriptDef.ScriptCheckBit(lineData)
+	case fileio.OP_NO_OP:
+		returnValue = 1
+	case fileio.OP_SET_BIT: // 0x22
+		returnValue = scriptDef.ScriptSetBit(lineData)
 	case fileio.OP_SE_ON: // 0x36
 		returnValue = scriptDef.ScriptSeOn(lineData, gameDef)
 	case fileio.OP_COMPARE: // 0x23
