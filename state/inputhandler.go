@@ -76,6 +76,9 @@ func (h *InputHandler) HandleAllInput(gameDef *game.GameDef, timeElapsedSeconds 
 		gameDef.StageId = 1
 		gameDef.RoomId = 3
 		gameDef.StateStatus = game.GAME_LOAD_ROOM
+		if loc, ok := game.DebugLocations[game.RoomMapKey{StageId: 1, RoomId: 3}]; ok {
+			gameDef.Player.Position = loc
+		}
 		fmt.Println("Warp to ROOM1030")
 	}
 	roomWarpPrev = curR
