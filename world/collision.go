@@ -23,8 +23,12 @@ func CheckCollision(newPosition mgl32.Vec3, collisionEntities []fileio.Collision
 	if os.Getenv("DISABLE_COLLISION") == "1" {
 		return nil
 	}
+	ignoreId := os.Getenv("IGNORE_COLLISION_ID")
 	playerFloorNum := int(math.Round(float64(newPosition.Y()) / fileio.FLOOR_HEIGHT_UNIT))
 	for _, entity := range collisionEntities {
+		if ignoreId != "" && fmt.Sprintf("%d", entity.ScaIndex) == ignoreId {
+			continue
+		}
 		// The boundary is on a different floor than the player
 		if !entity.FloorCheck[playerFloorNum] {
 			continue
@@ -32,14 +36,8 @@ func CheckCollision(newPosition mgl32.Vec3, collisionEntities []fileio.Collision
 
 		switch entity.Shape {
 		case 0:
-			// Rectangle
-			corner1 := mgl32.Vec3{float32(entity.X), 0, float32(entity.Z)}
-			corner2 := mgl32.Vec3{float32(entity.X), 0, float32(entity.Z) + float32(entity.Density)}
-			corner3 := mgl32.Vec3{float32(entity.X) + float32(entity.Width), 0, float32(entity.Z) + float32(entity.Density)}
-			corner4 := mgl32.Vec3{float32(entity.X) + float32(entity.Width), 0, float32(entity.Z)}
-			if isPointInRectangle(newPosition, corner1, corner2, corner3, corner4) {
-				return &entity
-			}
+			// Shape 0 is a walkable floor region, not a solid wall.
+			continue
 		case 1:
 			// Triangle \\|
 			vertex1 := mgl32.Vec3{float32(entity.X), 0, float32(entity.Z + entity.Density)}

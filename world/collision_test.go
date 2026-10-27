@@ -46,10 +46,10 @@ func TestCheckCollision(t *testing.T) {
 		description    string
 	}{
 		{
-			name:           "Point inside rectangle",
+			name:           "Point inside floor rectangle (no collision)",
 			position:       mgl32.Vec3{20, 0, 20}, // Center of rectangle
-			expectedEntity: &collisionEntities[0],
-			description:    "Should detect collision with rectangle",
+			expectedEntity: nil,
+			description:    "Shape 0 is a walkable floor, not a wall",
 		},
 		{
 			name:           "Point outside rectangle",
