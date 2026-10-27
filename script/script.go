@@ -215,6 +215,8 @@ func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 		returnValue = 1
 	case fileio.OP_WHILE_END: // 0x10
 		returnValue = 1
+	case fileio.OP_CHECK: // 0x21
+		returnValue = scriptDef.ScriptCheckBit(lineData)
 	case fileio.OP_SET_BIT: // 0x22
 		returnValue = scriptDef.ScriptSetBit(lineData)
 	case fileio.OP_SE_ON: // 0x36
@@ -313,6 +315,18 @@ func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 		returnValue = 1 // not implemented
 	case fileio.OP_EVT_KILL: // 0x05
 		returnValue = 1 // not implemented
+	case fileio.OP_ADD_SPEED: // 0x2f
+		returnValue = 1
+	case fileio.OP_SPEED_SET: // 0x30
+		returnValue = 1
+	case fileio.OP_ADD_ASPEED: // 0x31
+		returnValue = 1
+	case fileio.OP_KAGE_SET: // 0x60
+		returnValue = 1
+	case fileio.OP_CUT_BE_SET: // 0x61
+		returnValue = 1
+	case fileio.OP_PARTS_SET: // 0x6e
+		returnValue = 1
 	default:
 		if !seenUnhandled[opcode] {
 			seenUnhandled[opcode] = true
