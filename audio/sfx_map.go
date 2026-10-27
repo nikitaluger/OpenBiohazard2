@@ -1,6 +1,7 @@
 package audio
 
-// SFXFileNames maps known SAP filenames to descriptions.
+// SFXFileNames maps known SAP/DOOR filenames to descriptions.
+// DOOR## files are mostly door-related audio (open/close/animated beat).
 // Populated from manual listening.
 var SFXFileNames = map[string]string{
 	"CORE00": "character damage voice 1",
