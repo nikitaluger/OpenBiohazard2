@@ -20,7 +20,15 @@
 - [x] Implement sprite kill opcode
 - [x] Enable sprite rendering
 
-## Next
+## Vertical Slice (reach ROOM1010 - Kendo's gunshop)
+- [x] Player movement (tank controls)
+- [x] Camera switching
+- [x] Pre-rendered background
+- [x] Collision (walls + slopes)
+- [x] Door transition (ROOM1000 -> ROOM1010)
+- [x] Audio (BGM plays)
+- [ ] Enemy placeholder (if present)
+- [ ] Item pickup (if present)
 - [x] Add hermetic tests for bitreader edge cases (mostly done)
 - [x] Add valid-case TIM test
 - [x] Add tests for EMD / MD1 / ESP
