@@ -3,6 +3,7 @@ package world
 import (
 	"fmt"
 	"math"
+	"os"
 
 	"github.com/OpenBiohazard2/OpenBiohazard2/fileio"
 	"github.com/go-gl/mathgl/mgl32"
@@ -19,6 +20,9 @@ func RemoveCollisionEntity(collisionEntities []fileio.CollisionEntity, entityId 
 }
 
 func CheckCollision(newPosition mgl32.Vec3, collisionEntities []fileio.CollisionEntity) *fileio.CollisionEntity {
+	if os.Getenv("DISABLE_COLLISION") == "1" {
+		return nil
+	}
 	playerFloorNum := int(math.Round(float64(newPosition.Y()) / fileio.FLOOR_HEIGHT_UNIT))
 	for _, entity := range collisionEntities {
 		// The boundary is on a different floor than the player
