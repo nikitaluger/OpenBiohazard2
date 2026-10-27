@@ -205,6 +205,8 @@ func (scriptDef *ScriptDef) ExecuteSingleInstruction(
 		returnValue = scriptDef.ScriptBreak(curScriptThread, lineData)
 	case fileio.OP_NO_OP:
 		returnValue = 1
+	case fileio.OP_CHECK: // 0x21
+		returnValue = scriptDef.ScriptCheckBit(lineData)
 	case fileio.OP_SET_BIT: // 0x22
 		returnValue = scriptDef.ScriptSetBit(lineData)
 	case fileio.OP_SE_ON: // 0x36
