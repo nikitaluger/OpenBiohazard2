@@ -136,6 +136,25 @@ func loadRoomState(mainGameStateInput *MainGameStateInput) error {
 	// Clear enemies before the room's init script repopulates them.
 	renderDef.SceneSystem.EnemyGroupEntity.ClearEnemies()
 
+	// Debug: spawn a placeholder enemy in Kendo's gun shop (ROOM1010).
+	if gameDef.StageId == 1 && gameDef.RoomId == 0x01 {
+		emdOutput, err := fileio.LoadEMDFile("data/Pl0/Emd0/EM040.EMD")
+		if err == nil {
+			enemy := render.NewEnemyEntity(emdOutput)
+			enemy.SetEnemyData(fileio.ScriptInstrSceEmSet{
+				Type:      0x040,
+				ModelType: 1,
+				X:         -20000,
+				Y:         0,
+				Z:         -20000,
+			})
+			renderDef.SceneSystem.EnemyGroupEntity.AddEnemy(enemy)
+			if gameDef.Audio != nil {
+				gameDef.Audio.PlaySFX(0x0B)
+			}
+		}
+	}
+
 	initScriptOnRoomLoad(scriptDef, gameDef, renderDef)
 
 	// Free the previous room's debug entities before replacing them.
