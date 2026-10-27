@@ -1,6 +1,7 @@
 package audio
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/gopxl/beep"
@@ -56,7 +57,23 @@ func (p *pcmStreamer) Stream(samples [][2]float64) (int, bool) {
 
 func (p *pcmStreamer) Err() error { return nil }
 
-// DecodeVAGToWAV writes decoded VAG data as a WAV file.
+// DecodeSAPToWAV writes decoded SAP (MS-ADPCM) data as a WAV file.
+func DecodeSAPToWAV(data []byte, w io.WriteSeeker) error {
+	wave, ok := DecodeSAP(data)
+	if !ok {
+		return fmt.Errorf("failed to decode SAP")
+	}
+	sr := beep.SampleRate(wave.SamplesPerSec)
+	streamer := newPCMStreamer(wave.Samples, wave.Channels)
+	format := beep.Format{
+		SampleRate:  sr,
+		NumChannels: wave.Channels,
+		Precision:   2,
+	}
+	buf := beep.NewBuffer(format)
+	buf.Append(streamer)
+	return wav.Encode(w, buf.Streamer(0, buf.Len()), format)
+}
 func DecodeVAGToWAV(data []byte, sampleRate int, w io.WriteSeeker) error {
 	pcm := DecodeVAG(data)
 	return writePCMToWAV(pcm, 1, sampleRate, w)

@@ -26,3 +26,4 @@ data/*
 *.exe
 *.wav
 *.log
+audio_dump/
