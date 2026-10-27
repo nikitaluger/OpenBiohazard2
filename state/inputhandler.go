@@ -1,6 +1,8 @@
 package state
 
 import (
+	"fmt"
+
 	"github.com/OpenBiohazard2/OpenBiohazard2/client"
 	"github.com/OpenBiohazard2/OpenBiohazard2/fileio"
 	"github.com/OpenBiohazard2/OpenBiohazard2/game"
@@ -56,8 +58,17 @@ func (h *InputHandler) HandleInventoryToggle() {
 	}
 }
 
+var collisionTogglePrev bool
+
 func (h *InputHandler) HandleAllInput(gameDef *game.GameDef, timeElapsedSeconds float64, gameWorld *world.GameWorld) {
 	collisionEntities := gameWorld.GameRoom.CollisionEntities
+
+	cur := h.windowHandler.InputHandler.IsKeyCPressed()
+	if cur && !collisionTogglePrev {
+		world.DebugNoClip = !world.DebugNoClip
+		fmt.Printf("NoClip toggled: %v\n", world.DebugNoClip)
+	}
+	collisionTogglePrev = cur
 
 	h.HandleTankMovement(gameDef, timeElapsedSeconds, collisionEntities)
 	h.HandleTankRotation(gameDef, timeElapsedSeconds)

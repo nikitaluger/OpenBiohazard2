@@ -114,3 +114,7 @@ func (handler *InputHandler) mouseCallback(window *glfw.Window, xPos float64, yP
 	handler.cursorLast[0] = xPos
 	handler.cursorLast[1] = yPos
 }
+// IsKeyCPressed reports whether the C key is currently held.
+func (h *InputHandler) IsKeyCPressed() bool {
+	return h.keysPressed[glfw.KeyC]
+}

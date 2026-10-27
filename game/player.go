@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/OpenBiohazard2/OpenBiohazard2/fileio"
@@ -54,8 +55,17 @@ func (p *Player) GetModelMatrix() mgl32.Mat4 {
 func (player *Player) HandlePlayerInputForward(collisionEntities []fileio.CollisionEntity, timeElapsedSeconds float64) {
 	predictPosition := player.PredictPositionForward(timeElapsedSeconds)
 	collidingEntity := world.CheckCollision(predictPosition, collisionEntities)
+	if collidingEntity != nil {
+		fmt.Printf("Collision blocked: shape=%d pos=(%d,%d) size=(%d,%d) player=(%.0f,%.0f)\n",
+			collidingEntity.Shape, collidingEntity.X, collidingEntity.Z,
+			collidingEntity.Width, collidingEntity.Density,
+			predictPosition.X(), predictPosition.Z())
+	}
 	if collidingEntity == nil {
 		player.Position = predictPosition
+		if world.DebugNoClip {
+			player.Position = mgl32.Vec3{player.Position.X(), 0, player.Position.Z()}
+		}
 		player.PoseNumber = PLAYER_WALKING_POSE
 	} else {
 		if world.CheckRamp(collidingEntity) {
@@ -72,8 +82,17 @@ func (player *Player) HandlePlayerInputForward(collisionEntities []fileio.Collis
 func (player *Player) HandlePlayerInputBackward(collisionEntities []fileio.CollisionEntity, timeElapsedSeconds float64) {
 	predictPosition := player.PredictPositionBackward(timeElapsedSeconds)
 	collidingEntity := world.CheckCollision(predictPosition, collisionEntities)
+	if collidingEntity != nil {
+		fmt.Printf("Collision blocked: shape=%d pos=(%d,%d) size=(%d,%d) player=(%.0f,%.0f)\n",
+			collidingEntity.Shape, collidingEntity.X, collidingEntity.Z,
+			collidingEntity.Width, collidingEntity.Density,
+			predictPosition.X(), predictPosition.Z())
+	}
 	if collidingEntity == nil {
 		player.Position = predictPosition
+		if world.DebugNoClip {
+			player.Position = mgl32.Vec3{player.Position.X(), 0, player.Position.Z()}
+		}
 		player.PoseNumber = 1
 	} else {
 		if world.CheckRamp(collidingEntity) {

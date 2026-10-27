@@ -19,7 +19,13 @@ func RemoveCollisionEntity(collisionEntities []fileio.CollisionEntity, entityId 
 	}
 }
 
+// DebugNoClip disables collision and snaps the player to the ground.
+var DebugNoClip bool
+
 func CheckCollision(newPosition mgl32.Vec3, collisionEntities []fileio.CollisionEntity) *fileio.CollisionEntity {
+	if DebugNoClip {
+		return nil
+	}
 	if os.Getenv("DISABLE_COLLISION") == "1" {
 		return nil
 	}
